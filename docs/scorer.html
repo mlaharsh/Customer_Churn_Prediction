@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Live Churn Scorer · Churn Signal</title>
+<meta name="description" content="Score a Telco customer against the fitted Churn Signal logistic regression in your browser. No login, no server, and the same exported coefficients as the Python pipeline.">
+<meta name="theme-color" content="#0B1F33">
+<meta property="og:title" content="Live Churn Scorer · Churn Signal">
+<meta property="og:description" content="A real interactive churn scorer running the exported logistic-regression coefficients entirely in the browser.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mlaharsh.github.io/Customer_Churn_Prediction/scorer.html">
+<meta property="og:image" content="https://mlaharsh.github.io/Customer_Churn_Prediction/assets/app_scorer.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://mlaharsh.github.io/Customer_Churn_Prediction/scorer.html">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1F33'/%3E%3Cpath d='M32 12l16 20-16 20-16-20z' fill='%238ED7D2'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="scorer.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="index.html" aria-label="Churn Signal showcase">
+      <span class="brand-mark" aria-hidden="true">◈</span>
+      <span>Churn Signal</span>
+      <span class="brand-sub">Live scorer</span>
+    </a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a class="nav-keep" href="index.html">Overview</a>
+      <a href="#scorer">Single account</a>
+      <a href="#threshold">Threshold lab</a>
+      <a href="#batch">Batch</a>
+      <a class="nav-cta" href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="hero-grid-bg" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow eyebrow-light"><span class="dot" aria-hidden="true"></span>Live · runs entirely in your browser</p>
+        <h1>Put a churn score <span class="h1-accent">behind every account.</span></h1>
+        <p class="hero-lead">
+          This is the fitted <strong>logistic-regression model</strong> from Churn Signal, exported to
+          JavaScript with its exact preprocessing parameters. Change an account, test a contact
+          policy, or score a CSV — <strong>no login and no server round trip.</strong>
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#scorer">Score a customer <span aria-hidden="true">↓</span></a>
+          <a class="btn btn-ghost" href="#batch">Batch score a CSV <span aria-hidden="true">→</span></a>
+        </div>
+        <p class="hero-note">
+          Exported from <strong>models/churn_model.joblib</strong> · threshold <strong class="js-threshold">0.583</strong> ·
+          holdout ROC-AUC <strong class="js-roc">0.846</strong>
+        </p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hero-panel">
+          <div class="hero-panel-top">
+            <p class="hero-panel-label">Holdout snapshot</p>
+            <span class="live-chip">Model live</span>
+          </div>
+          <div class="hero-metric">
+            <span class="hero-metric-value"><span class="js-flagged">492</span> <span style="font-size:0.42em;font-weight:600;letter-spacing:-0.01em;color:#9db9c5;">of <span class="js-holdout-n">1,409</span> flagged</span></span>
+            <span class="hero-metric-label">at the <span class="js-threshold">0.583</span> outreach threshold</span>
+          </div>
+          <div class="hero-meter" aria-hidden="true">
+            <div class="hero-meter-marker js-alert-marker" style="left:34.9%"></div>
+          </div>
+          <div class="hero-mini-grid">
+            <div class="hero-mini"><span>Alert rate</span><strong class="js-alert-rate">34.9%</strong></div>
+            <div class="hero-mini"><span>Churn recall</span><strong class="js-recall">72.2%</strong></div>
+            <div class="hero-mini"><span>Precision</span><strong class="js-precision">54.9%</strong></div>
+            <div class="hero-mini"><span>Churners caught</span><strong class="js-caught">270 / 374</strong></div>
+          </div>
+          <p class="hero-panel-foot">
+            Threshold metrics are replayed from the saved <strong>1,409-row holdout evaluation</strong>.
+            The scorer itself runs locally from exported coefficients.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="scorer">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">01 · Single-account workbench</p>
+          <h2>Change the facts. Watch the risk move.</h2>
+        </div>
+        <p class="section-lead">
+          Every input updates the score immediately. The model uses <strong>22 engineered features</strong>,
+          including contract, service mix, spend, and tenure. The result is a prioritisation signal,
+          not a causal verdict.
+        </p>
+      </div>
+
+      <div class="score-layout">
+        <form class="form-card" id="profileForm" novalidate>
+          <div class="card-head">
+            <div>
+              <h3>Customer profile</h3>
+              <p>19 account inputs · updates live</p>
+            </div>
+            <div class="card-head-actions">
+              <button class="btn btn-secondary btn-small" type="button" id="exampleHigh">High-risk example</button>
+              <button class="btn btn-secondary btn-small" type="button" id="exampleLoyal">Loyal example</button>
+              <button class="btn btn-quiet btn-small" type="button" id="resetForm">Reset</button>
+            </div>
+          </div>
+          <div class="form-body" id="formBody"></div>
+          <div class="form-foot">
+            <p><span class="privacy-dot" aria-hidden="true"></span>Inputs stay in this tab. Nothing is uploaded or stored.</p>
+            <p>22 model features · <span class="js-threshold">0.583</span> policy threshold</p>
+          </div>
+        </form>
+
+        <aside class="result-panel" aria-label="Live score result">
+          <article class="result-card" id="resultCard">
+            <div class="result-head">
+              <div class="result-kicker">
+                <span>Live prediction</span>
+                <time id="modelStamp">loading model</time>
+              </div>
+              <div class="probability-row">
+                <div>
+                  <p class="probability" id="probabilityValue">—<small>%</small></p>
+                  <p class="probability-label">estimated churn probability</p>
+                </div>
+                <span class="risk-badge" id="riskBadge">—</span>
+              </div>
+              <div class="gauge" role="img" aria-label="Churn probability risk band" id="riskGauge">
+                <div class="gauge-track">
+                  <div class="gauge-marker" id="gaugeMarker" style="left:50%"></div>
+                </div>
+                <div class="gauge-labels" aria-hidden="true">
+                  <span>Low</span><span>Medium</span><span>High</span><span>Critical</span>
+                </div>
+              </div>
+              <div class="decision" id="decisionBox">
+                <span class="decision-mark" aria-hidden="true">•</span>
+                <span id="decisionText">Loading the exported model…</span>
+              </div>
+            </div>
+
+            <div class="result-body">
+              <div class="error-box" id="resultError" role="alert" hidden></div>
+
+              <div class="result-section">
+                <h4 class="result-section-title">Expected revenue at risk <span>probability × monthly charges</span></h4>
+                <div class="revenue-grid">
+                  <div class="revenue-tile">
+                    <span>Monthly</span>
+                    <strong id="monthlyRisk">$0.00</strong>
+                  </div>
+                  <div class="revenue-tile">
+                    <span>Annualised</span>
+                    <strong id="annualRisk">$0.00</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="result-section">
+                <h4 class="result-section-title">Suggested retention plays <span>rule-based, not causal</span></h4>
+                <ol class="action-list" id="actionList"></ol>
+              </div>
+
+              <div class="result-section">
+                <h4 class="result-section-title">Sensitivity vs. training baseline <span>one field at a time</span></h4>
+                <div class="driver-list" id="driverList"></div>
+                <p class="driver-note">
+                  Each bar resets one field to its training-set median or mode while holding the rest
+                  fixed. It is a transparent what-if check, not an attribution or uplift estimate.
+                </p>
+              </div>
+            </div>
+          </article>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-tinted" id="threshold">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">02 · Decision policy</p>
+          <h2>Move the threshold. See who pays for it.</h2>
+        </div>
+        <p class="section-lead">
+          A churn score becomes a campaign only after choosing a contact policy. The slider replays
+          the <strong>saved holdout predictions</strong>; it does not refit the model.
+        </p>
+      </div>
+
+      <div class="lab-card">
+        <div class="lab-grid">
+          <div class="lab-controls">
+            <h3>Outreach threshold</h3>
+            <p>Customers at or above this score are flagged for retention outreach.</p>
+            <div class="threshold-readout">
+              <p class="threshold-value" id="thresholdValue">0.583</p>
+              <span class="threshold-default">selected policy</span>
+            </div>
+            <label class="sr-only" for="thresholdSlider">Outreach threshold</label>
+            <input class="slider" id="thresholdSlider" type="range" min="0.1" max="0.9" step="0.001" value="0.583">
+            <div class="slider-ticks" aria-hidden="true">
+              <span>0.10</span><span>0.30</span><span>0.50</span><span>0.70</span><span>0.90</span>
+            </div>
+            <p class="lab-hint" id="thresholdHint">
+              The selected policy maximizes F1 on <strong>out-of-fold training predictions</strong>, then
+              is evaluated once on the holdout set.
+            </p>
+          </div>
+
+          <div class="lab-chart">
+            <div class="chart-head">
+              <p class="chart-title">Holdout trade-off</p>
+              <div class="chart-legend" aria-hidden="true">
+                <span><i class="legend-precision"></i>Precision</span>
+                <span><i class="legend-recall"></i>Recall</span>
+              </div>
+            </div>
+            <svg class="curve" id="tradeoffChart" viewBox="0 0 680 270" role="img" aria-labelledby="curveTitle curveDesc">
+              <title id="curveTitle">Precision and recall across outreach thresholds</title>
+              <desc id="curveDesc">Holding out 1,409 customers, precision rises and recall falls as the threshold increases.</desc>
+            </svg>
+            <p class="lab-note">
+              <strong>Precision</strong> is the share of contacted customers who churned.
+              <strong>Recall</strong> is the share of churners who were contacted. Higher thresholds
+              protect outreach capacity but miss more churners.
+            </p>
+          </div>
+        </div>
+
+        <div class="lab-metrics">
+          <div class="lab-metric">
+            <span>Contacts</span>
+            <strong id="labContacts">492</strong>
+            <small id="labAlertRate">34.9% alert rate</small>
+          </div>
+          <div class="lab-metric">
+            <span>Precision</span>
+            <strong id="labPrecision">54.9%</strong>
+            <small id="labPrecisionDetail">270 of 492 contacted</small>
+          </div>
+          <div class="lab-metric">
+            <span>Recall</span>
+            <strong id="labRecall">72.2%</strong>
+            <small id="labRecallDetail">270 of 374 churners</small>
+          </div>
+          <div class="lab-metric">
+            <span>F1</span>
+            <strong id="labF1">0.624</strong>
+            <small id="labMissed">104 churners missed</small>
+          </div>
+          <div class="lab-metric">
+            <span>Annual revenue at risk</span>
+            <strong id="labRevenue">$354.3k</strong>
+            <small>expected among flagged accounts</small>
+          </div>
+        </div>
+
+        <div class="lab-bottom">
+          <div class="confusion-row">
+            <div class="confusion-card">
+              <h4>Holdout confusion matrix</h4>
+              <div class="confusion">
+                <div class="confusion-cell true-negative"><span>True negative</span><strong id="labTN">813</strong></div>
+                <div class="confusion-cell false-positive"><span>False positive</span><strong id="labFP">222</strong></div>
+                <div class="confusion-cell false-negative"><span>False negative</span><strong id="labFN">104</strong></div>
+                <div class="confusion-cell true-positive"><span>True positive</span><strong id="labTP">270</strong></div>
+              </div>
+            </div>
+            <p class="lab-note" id="thresholdFootnote">
+              At <strong>0.583</strong>, 270 of 374 churners are contacted while 222 retained customers
+              are also contacted. That is a deliberate retention trade-off, not an accuracy claim.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="batch">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">03 · Batch scoring</p>
+          <h2>Work a list, not a demo.</h2>
+        </div>
+        <p class="section-lead">
+          Upload the raw Telco schema, validate every row in the browser, and download a ranked
+          campaign file. Files are processed in memory on this device.
+        </p>
+      </div>
+
+      <div class="batch-card">
+        <div class="batch-head">
+          <div>
+            <h3>Score a customer CSV</h3>
+            <p>
+              Required columns are the 19 raw feature columns; <code>customerID</code> is optional and
+              <code>Churn</code> is ignored if present. Missing IDs are generated, duplicate IDs are rejected,
+              and blank <code>TotalCharges</code> is filled from tenure × monthly charges.
+            </p>
+          </div>
+          <div class="batch-actions">
+            <button class="btn btn-secondary btn-small" type="button" id="downloadTemplate">Download template</button>
+            <button class="btn btn-secondary btn-small" type="button" id="loadSample">Load sample</button>
+            <button class="btn btn-secondary btn-small" type="button" id="downloadBatch" disabled>Download scored CSV</button>
+          </div>
+        </div>
+
+        <label class="dropzone" id="dropzone" for="fileInput">
+          <span class="dropzone-icon" aria-hidden="true">↑</span>
+          <span class="dropzone-copy">
+            <strong id="dropzoneTitle">Drop a CSV here or choose a file</strong>
+            <span>Up to 50,000 rows · processed locally · raw Telco schema</span>
+          </span>
+          <input id="fileInput" type="file" accept=".csv,text/csv">
+        </label>
+
+        <p class="batch-status" id="batchStatus">No file loaded. Download the template or load the sample list to try it.</p>
+        <div class="batch-empty" id="batchEmpty">
+          <strong>Expected schema</strong><br>
+          customerID (optional), gender, SeniorCitizen, Partner, Dependents, tenure, PhoneService,
+          MultipleLines, InternetService, OnlineSecurity, OnlineBackup, DeviceProtection, TechSupport,
+          StreamingTV, StreamingMovies, Contract, PaperlessBilling, PaymentMethod, MonthlyCharges, TotalCharges
+          <div class="batch-schema">The downloaded file is ranked by churn probability and includes risk tier, outreach flag, revenue at risk, and derived features.</div>
+        </div>
+
+        <div class="batch-summary" id="batchSummary" aria-live="polite">
+          <div class="batch-stat"><span>Rows scored</span><strong id="batchRows">—</strong></div>
+          <div class="batch-stat"><span>Flagged</span><strong id="batchFlagged">—</strong></div>
+          <div class="batch-stat"><span>Critical tier</span><strong id="batchCritical">—</strong></div>
+          <div class="batch-stat"><span>Annual revenue at risk</span><strong id="batchRevenue">—</strong></div>
+        </div>
+
+        <div class="table-wrap" id="tableWrap">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th scope="col">Customer</th>
+                <th scope="col">Churn prob.</th>
+                <th scope="col">Decision</th>
+                <th scope="col">Risk tier</th>
+                <th scope="col">Tenure</th>
+                <th scope="col">Contract</th>
+                <th scope="col">Internet</th>
+                <th scope="col">Monthly</th>
+                <th scope="col">Annual at risk</th>
+              </tr>
+            </thead>
+            <tbody id="batchBody"></tbody>
+          </table>
+        </div>
+        <div class="table-foot is-hidden" id="tableFoot">
+          <span id="tableCaption">Ranked by churn probability. Preview shows the first 25 accounts.</span>
+          <span>Download includes all 28 scoring and account columns.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-tinted" id="method">
+    <div class="wrap">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">04 · What this is</p>
+          <h2>The same model, not a lookalike.</h2>
+        </div>
+        <p class="section-lead">
+          The browser scorer is a deployment surface for the trained pipeline, not a new model and
+          not a mock-up. The native Streamlit workbench remains the full reference implementation.
+        </p>
+      </div>
+
+      <div class="method-grid">
+        <article class="method-card">
+          <span class="method-num">01</span>
+          <h3>Exported coefficients</h3>
+          <p>
+            The logistic-regression intercept, one-hot coefficients, imputer medians, and scaler
+            parameters come directly from <code>models/churn_model.joblib</code>.
+          </p>
+          <p>A Python export script regenerates the browser data so the static page cannot drift silently.</p>
+        </article>
+        <article class="method-card">
+          <span class="method-num">02</span>
+          <h3>Identical preprocessing</h3>
+          <p>
+            The browser derives the same <code>AvgMonthlySpend</code>, <code>ServiceCount</code>, and
+            <code>IsNewCustomer</code> fields, then applies median imputation, standard scaling, and
+            unknown-category handling.
+          </p>
+          <p>Example profiles are checked against the Python pipeline's probabilities.</p>
+        </article>
+        <article class="method-card">
+          <span class="method-num">03</span>
+          <h3>Honest evaluation</h3>
+          <p>
+            The threshold lab replays saved holdout predictions from the original evaluation split.
+            It does not tune on the holdout set or claim production readiness.
+          </p>
+          <p>Use the model card and deployment notes before applying scores to real customers.</p>
+        </article>
+      </div>
+
+      <div class="trust-strip">
+        <span><strong>Model:</strong> <span class="js-model-name">Logistic regression</span></span>
+        <span><strong>Threshold:</strong> <span class="js-threshold">0.583</span></span>
+        <span><strong>Holdout ROC-AUC:</strong> <span class="js-roc">0.846</span></span>
+        <span><strong>Data:</strong> public IBM Telco sample</span>
+        <span><strong>Runtime:</strong> client-side JavaScript</span>
+      </div>
+
+      <div class="method-links">
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/model_card.md" target="_blank" rel="noreferrer">Model card ↗</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/deployment.md" target="_blank" rel="noreferrer">Deployment guide ↗</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">Repository ↗</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/app.py" target="_blank" rel="noreferrer">Native Streamlit app ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <span>Built by MLA Harsh. Dataset: public IBM Telco Customer Churn. The browser scorer is a demo, not a production decision system.</span>
+      <span class="footer-links">
+        <a href="index.html">Showcase</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">GitHub</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/LICENSE" target="_blank" rel="noreferrer">MIT license</a>
+      </span>
+    </div>
+  </footer>
+</main>
+
+<script src="scorer_data.js"></script>
+<script src="scorer.js"></script>
+<script src="scorer_ui.js"></script>
+</body>
+</html>

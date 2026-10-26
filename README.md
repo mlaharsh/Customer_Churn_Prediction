@@ -2,16 +2,18 @@
 
 [![CI](https://github.com/mlaharsh/Customer_Churn_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/mlaharsh/Customer_Churn_Prediction/actions/workflows/ci.yml)
 [![Showcase](https://img.shields.io/badge/showcase-live-0E7C86?style=flat-square)](https://mlaharsh.github.io/Customer_Churn_Prediction/)
+[![Live scorer](https://img.shields.io/badge/live%20scorer-try%20it-2A9D8F?style=flat-square)](https://mlaharsh.github.io/Customer_Churn_Prediction/scorer.html)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-0B1F33?style=flat-square)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-workbench-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](docs/deployment.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-0B1F33?style=flat-square)](LICENSE)
 
-An end-to-end customer churn portfolio project built on the public IBM Telco Customer Churn dataset. It combines a reproducible scikit-learn pipeline, a downloadable model bundle, a multi-page Streamlit retention workbench, generated evaluation reports, tests, CI, Docker, and a static GitHub Pages showcase.
+An end-to-end customer churn portfolio project built on the public IBM Telco Customer Churn dataset. It combines a reproducible scikit-learn pipeline, a downloadable model bundle, a public client-side scorer, a multi-page Streamlit retention workbench, generated evaluation reports, tests, CI, Docker, and a static GitHub Pages showcase.
 
 The goal is not just to predict who leaves. It is to make the trade-off between **catching churners** and **wasting outreach capacity** explicit, then translate model output into a retention decision a team can actually run.
 
 - **Live showcase:** https://mlaharsh.github.io/Customer_Churn_Prediction/
-- **Interactive app:** run locally with `streamlit run app.py` (deployment guide in [`docs/deployment.md`](docs/deployment.md))
+- **Live scorer:** https://mlaharsh.github.io/Customer_Churn_Prediction/scorer.html — the exported model running client-side; no login or server
+- **Native Streamlit app:** run locally with `streamlit run app.py` (deployment guide in [`docs/deployment.md`](docs/deployment.md))
 - **Evaluation report:** [`reports/evaluation/summary.md`](reports/evaluation/summary.md) · **Model card:** [`docs/model_card.md`](docs/model_card.md)
 
 ![Churn Signal overview](docs/assets/app_overview.png)
@@ -61,7 +63,7 @@ The recommended retention plays are therefore specific: annual-contract incentiv
 
 ## The product
 
-Churn Signal has five pages:
+Churn Signal ships in two forms: a five-page **Streamlit workbench** and a public **client-side scorer**.
 
 | Page | What it does |
 | --- | --- |
@@ -70,6 +72,8 @@ Churn Signal has five pages:
 | **Batch scoring** | Uploads a CSV, validates the schema, scores every customer, and exports the result. |
 | **Model performance** | Replays the holdout evaluation, compares candidates, and lets you test a different outreach threshold. |
 | **Method & limits** | Model card, data dictionary, reproduction steps, and responsible-use notes. |
+
+The **live scorer** at https://mlaharsh.github.io/Customer_Churn_Prediction/scorer.html exposes single-account scoring, the holdout threshold lab, and CSV batch scoring in the browser. It runs the exported logistic-regression coefficients and preprocessing parameters from `models/churn_model.joblib`; there is no server, login, or upload. It is a static implementation of the same model, not a Streamlit Cloud deployment. The Streamlit workbench above remains the full native reference.
 
 The scorer is interactive: change tenure, contract, services, or billing facts and see the probability and retention recommendation update. The explanation is a transparent sensitivity check against training-set baselines — useful for prioritisation, not proof of causation.
 
@@ -170,9 +174,11 @@ Open `http://localhost:8501`. Training takes about a minute on a laptop and rewr
 
 ```bash
 python -m pytest -q
+python -m churn.browser_export --check
+node tests/browser_scorer.test.js
 ```
 
-The suite covers the data contract, cleaning edge cases, preprocessing, risk bands, scoring, explanations, model serialization, the committed evaluation artifacts, and headless rendering of all five app pages.
+The Python suite covers the data contract, cleaning edge cases, preprocessing, risk bands, scoring, explanations, model serialization, the committed evaluation artifacts, headless rendering of all five app pages, and the browser-export contract. The Node suite checks that the JavaScript scorer reproduces the Python probabilities and the saved holdout threshold counts.
 
 ### Docker
 
@@ -216,6 +222,7 @@ The download contains the probability, risk tier, outreach flag, expected annual
 │   ├── insights.py                # scoring, risk tiers, what-if explanations
 │   ├── modeling.py                # candidates, CV, threshold tuning, serialization
 │   ├── reporting.py               # evaluation figures and tables
+│   ├── browser_export.py          # exports fitted parameters for the static scorer
 │   └── train.py                   # reproducible CLI entry point
 ├── data/raw/telco_churn.csv       # canonical public dataset
 ├── models/
@@ -227,14 +234,19 @@ The download contains the probability, risk tier, outreach flag, expected annual
 │   └── figures/                   # generated PNGs used in docs/README
 ├── notebooks/legacy_churn_analysis.ipynb
 ├── tests/
+│   └── browser_scorer.test.js     # Node parity checks for the public scorer
 ├── docs/
 │   ├── index.html                 # static GitHub Pages showcase
+│   ├── scorer.html                # live client-side scorer
+│   ├── scorer.js                  # scoring, threshold, and CSV logic
+│   ├── scorer_ui.js               # form, result, and batch UI glue
+│   ├── scorer_data.js             # generated model/preprocessing/holdout payload
 │   ├── assets/                    # screenshots and copied figures
 │   ├── model_card.md
 │   ├── data_dictionary.md
 │   └── deployment.md
 ├── .github/workflows/
-│   ├── ci.yml                     # tests, rebuild, Streamlit smoke test
+│   ├── ci.yml                     # tests, browser parity, rebuild, Streamlit smoke test
 │   └── pages.yml                  # GitHub Pages deployment
 ├── Dockerfile
 ├── requirements.txt
@@ -248,9 +260,12 @@ The original notebook is preserved at `notebooks/legacy_churn_analysis.ipynb` as
 
 ### GitHub Pages
 
-The static showcase is deployed from `docs/` by `.github/workflows/pages.yml`. On a push to `master` that changes `docs/`, GitHub Actions uploads the folder as a Pages artifact and deploys it.
+The static showcase and live scorer are deployed from `docs/` by `.github/workflows/pages.yml`. On a push to `master` that changes `docs/`, GitHub Actions uploads the folder as a Pages artifact and deploys it.
 
-Live URL: **https://mlaharsh.github.io/Customer_Churn_Prediction/**
+- Showcase: **https://mlaharsh.github.io/Customer_Churn_Prediction/**
+- Live scorer: **https://mlaharsh.github.io/Customer_Churn_Prediction/scorer.html**
+
+The scorer is a real client-side implementation of the fitted model, not a screenshot and not a Streamlit deployment. `python -m churn.browser_export` writes the exact coefficients and preprocessing parameters from `models/churn_model.joblib` to `docs/scorer_data.js`; the threshold lab replays the saved holdout predictions. CI fails if that generated file is stale or if the JavaScript probabilities drift from Python. See [`docs/deployment.md`](docs/deployment.md#browser-scorer-live) for details.
 
 ### Streamlit Community Cloud
 
@@ -261,13 +276,14 @@ The app is designed for a zero-secret Streamlit Community Cloud deployment:
 3. Create a new app from `mlaharsh/Customer_Churn_Prediction`, branch `master`, main file `app.py`.
 4. Select Python 3.11 and deploy.
 
-No environment variables are required; the app reads the committed model and evaluation artifacts. Step-by-step instructions, including Docker and local alternatives, are in [`docs/deployment.md`](docs/deployment.md). The Streamlit app is not claimed as publicly deployed in this README unless a live URL is added above.
+No environment variables are required; the app reads the committed model and evaluation artifacts. Step-by-step instructions, including Docker and local alternatives, are in [`docs/deployment.md`](docs/deployment.md). The Streamlit app is not claimed as publicly deployed in this README unless a live URL is added; the public interactive surface is the GitHub Pages scorer above.
 
 ### CI
 
 `.github/workflows/ci.yml` runs:
 
 - the pytest suite on Python 3.11 and 3.12;
+- a browser-scorer job that checks `docs/scorer_data.js` freshness, validates JavaScript syntax, and runs the Node/Python parity tests;
 - a two-fold training run that verifies the artifact export path;
 - a Streamlit health-check smoke test.
 

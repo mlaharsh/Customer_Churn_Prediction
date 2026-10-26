@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Churn Signal — Customer Churn Prediction</title>
-<meta name="description" content="A reproducible churn model and retention workbench built on 7,043 IBM Telco customers. 0.846 holdout ROC-AUC, an explicit contact policy, and the limits in plain sight.">
+<meta name="description" content="A reproducible churn model and retention workbench built on 7,043 IBM Telco customers. 0.846 holdout ROC-AUC, an explicit contact policy, and a live in-browser scorer.">
 <meta name="theme-color" content="#0B1F33">
 <meta property="og:title" content="Churn Signal — Customer Churn Prediction">
-<meta property="og:description" content="A reproducible churn model and retention workbench on the IBM Telco dataset. 0.846 holdout ROC-AUC, an explicit decision policy, and a full evaluation.">
+<meta property="og:description" content="A reproducible churn model and retention workbench on the IBM Telco dataset. 0.846 holdout ROC-AUC, an explicit decision policy, and a live client-side scorer.">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://mlaharsh.github.io/Customer_Churn_Prediction/">
 <meta property="og:image" content="https://mlaharsh.github.io/Customer_Churn_Prediction/assets/app_overview.png">
 <meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://mlaharsh.github.io/Customer_Churn_Prediction/">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1F33'/%3E%3Cpath d='M32 12l16 20-16 20-16-20z' fill='%238ED7D2'/%3E%3C/svg%3E">
 <style>
   :root {
@@ -560,6 +561,55 @@
     gap: 24px;
   }
 
+  .live-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    margin: 0 0 28px;
+    padding: 22px 24px;
+    border: 1px solid rgba(142, 215, 210, 0.24);
+    border-radius: 16px;
+    background:
+      radial-gradient(circle at 94% 0%, rgba(42, 157, 143, 0.22), transparent 20rem),
+      linear-gradient(135deg, #0B1F33 0%, #103746 100%);
+    color: #FFFFFF;
+    box-shadow: 0 18px 40px rgba(11, 31, 51, 0.14);
+  }
+  .live-banner-copy { max-width: 760px; }
+  .live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 9px;
+    color: var(--mint-light);
+    font-size: 0.64rem;
+    font-weight: 750;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+  .live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--mint-light);
+    box-shadow: 0 0 0 4px rgba(142, 215, 210, 0.12);
+  }
+  .live-banner h3 {
+    margin: 0 0 6px;
+    font-size: 1.18rem;
+    line-height: 1.2;
+    letter-spacing: -0.02em;
+  }
+  .live-banner p:last-child {
+    margin: 0;
+    color: #BFD8DF;
+    font-size: 0.79rem;
+    line-height: 1.6;
+  }
+  .live-banner p strong { color: #FFFFFF; font-weight: 650; }
+  .live-banner .btn { flex: 0 0 auto; }
+
   .metric-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -1003,6 +1053,13 @@
     .stat:first-child { border-top: 0; }
     .section { padding: 68px 0; }
     .section h2 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+    .live-banner {
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 18px;
+      padding: 20px 18px;
+    }
+    .live-banner .btn { width: 100%; }
     .fact-grid, .shot-grid, .metric-grid, .limits-grid, .next-list { grid-template-columns: 1fr; }
     .feature-grid { grid-template-columns: 1fr; }
     .feature, .feature:nth-child(3), .feature:nth-child(4) {
@@ -1050,7 +1107,8 @@
       <a href="#evaluation">Evaluation</a>
       <a href="#method">Method</a>
       <a href="#limits">Limits</a>
-      <a class="nav-cta" href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+      <a href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">GitHub</a>
+      <a class="nav-cta" href="scorer.html">Live scorer <span aria-hidden="true">→</span></a>
     </nav>
   </div>
 </header>
@@ -1068,12 +1126,12 @@
           and limits on the table.
         </p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">Explore the repository <span aria-hidden="true">↗</span></a>
-          <a class="btn btn-ghost" href="#workbench">Tour the workbench <span aria-hidden="true">→</span></a>
+          <a class="btn btn-primary" href="scorer.html">Try the live scorer <span aria-hidden="true">→</span></a>
+          <a class="btn btn-ghost" href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">Explore the repository <span aria-hidden="true">↗</span></a>
         </div>
         <p class="hero-note">
-          Logistic regression · <strong>0.846</strong> holdout ROC-AUC · threshold tuned out-of-fold ·
-          one-time holdout evaluation
+          Live client-side scorer · logistic regression · <strong>0.846</strong> holdout ROC-AUC ·
+          threshold tuned out-of-fold · one-time holdout evaluation
         </p>
       </div>
 
@@ -1212,8 +1270,23 @@
         <p class="section-lead">
           The Streamlit app turns the model into five linked surfaces: an executive overview,
           a single-customer scenario workbench, batch scoring, a threshold sandbox, and the method notes.
-          Every page is built around a decision a retention team can actually make.
+          The public browser scorer below is the same fitted model exported to JavaScript; the Streamlit
+          pages remain the full native reference.
         </p>
+      </div>
+
+      <div class="live-banner">
+        <div class="live-banner-copy">
+          <p class="live-pill"><span class="live-dot" aria-hidden="true"></span>Live · runs in your browser</p>
+          <h3>Try the model before you read the rest.</h3>
+          <p>
+            The public scorer runs the <strong>exported logistic-regression coefficients</strong> and the
+            same 22-feature preprocessing client-side: single accounts, the holdout threshold lab, and CSV
+            batch scoring. No login and no server. The Streamlit workbench is still the full native app and
+            runs locally or in Docker.
+          </p>
+        </div>
+        <a class="btn btn-primary" href="scorer.html">Open the live scorer <span aria-hidden="true">→</span></a>
       </div>
 
       <figure class="shot shot-wide">
@@ -1574,9 +1647,10 @@ streamlit run app.py</code></pre>
   <div class="wrap footer-inner">
     <div>
       <strong>Churn Signal</strong> · customer churn prediction &amp; retention workbench.<br>
-      Built by MLA Harsh. Dataset: <a href="https://www.kaggle.com/datasets/blastchar/telco-customer-churn" target="_blank" rel="noreferrer">IBM Telco Customer Churn</a>. Static showcase deployed with GitHub Pages.
+      Built by MLA Harsh. Dataset: <a href="https://www.kaggle.com/datasets/blastchar/telco-customer-churn" target="_blank" rel="noreferrer">IBM Telco Customer Churn</a>. Showcase and client-side scorer deployed with GitHub Pages.
     </div>
     <div class="footer-links">
+      <a href="scorer.html">Live scorer</a>
       <a href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">GitHub</a>
       <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/model_card.md" target="_blank" rel="noreferrer">Model card</a>
       <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/deployment.md" target="_blank" rel="noreferrer">Deployment</a>

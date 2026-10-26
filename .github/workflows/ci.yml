@@ -39,6 +39,33 @@ jobs:
       - name: Run tests
         run: python -m pytest -q
 
+  browser-scorer:
+    name: Browser scorer parity
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+          cache-dependency-path: requirements.txt
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Check generated browser data is current
+        run: python -m churn.browser_export --check
+      - name: Check JavaScript syntax
+        run: |
+          node --check docs/scorer.js
+          node --check docs/scorer_ui.js
+          node --check docs/scorer_data.js
+      - name: Run browser scorer parity tests
+        run: node tests/browser_scorer.test.js
+
   train:
     name: Rebuild artifacts
     runs-on: ubuntu-latest
