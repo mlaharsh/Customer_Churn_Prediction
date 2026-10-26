@@ -1,0 +1,4 @@
+segment,customers,churners,monthly_revenue,monthly_churn_revenue,annual_churn_revenue,churn_rate
+Month-to-month,3875,1655,257294.15,120847.1,1450165.2,0.4271
+One year,1473,166,95816.6,14118.45,169421.4,0.1127
+Two year,1695,48,103005.85,4165.3,49983.6,0.0283

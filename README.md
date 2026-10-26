@@ -1,162 +1,303 @@
-<div align="right">
+# Churn Signal — Customer Churn Prediction
 
+[![CI](https://github.com/mlaharsh/Customer_Churn_Prediction/actions/workflows/ci.yml/badge.svg)](https://github.com/mlaharsh/Customer_Churn_Prediction/actions/workflows/ci.yml)
+[![Showcase](https://img.shields.io/badge/showcase-live-0E7C86?style=flat-square)](https://mlaharsh.github.io/Customer_Churn_Prediction/)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-0B1F33?style=flat-square)](https://www.python.org/)
+[![Streamlit](https://img.shields.io/badge/Streamlit-workbench-FF4B4B?style=flat-square&logo=streamlit&logoColor=white)](docs/deployment.md)
+[![License: MIT](https://img.shields.io/badge/license-MIT-0B1F33?style=flat-square)](LICENSE)
 
+An end-to-end customer churn portfolio project built on the public IBM Telco Customer Churn dataset. It combines a reproducible scikit-learn pipeline, a downloadable model bundle, a multi-page Streamlit retention workbench, generated evaluation reports, tests, CI, Docker, and a static GitHub Pages showcase.
 
-[![github](https://raw.githubusercontent.com/Pradnya1208/Telecom-Customer-Churn-prediction/c292abd3f9cc647a7edc0061193f1523e9c05e1f/icons/git.svg)][1]
-[![linkedin](https://raw.githubusercontent.com/Pradnya1208/Telecom-Customer-Churn-prediction/9f5c4a255972275ced549ea6e34ef35019166944/icons/iconmonstr-linkedin-5.svg)][2]
-[![tableau](https://raw.githubusercontent.com/Pradnya1208/Telecom-Customer-Churn-prediction/e257c5d6cf02f13072429935b0828525c601414f/icons/icons8-tableau-software%20(1).svg)][3]
-[![twitter](https://raw.githubusercontent.com/Pradnya1208/Telecom-Customer-Churn-prediction/c9f9c5dc4e24eff0143b3056708d24650cbccdde/icons/iconmonstr-twitter-5.svg)][4]
+The goal is not just to predict who leaves. It is to make the trade-off between **catching churners** and **wasting outreach capacity** explicit, then translate model output into a retention decision a team can actually run.
 
-</div>
+- **Live showcase:** https://mlaharsh.github.io/Customer_Churn_Prediction/
+- **Interactive app:** run locally with `streamlit run app.py` (deployment guide in [`docs/deployment.md`](docs/deployment.md))
+- **Evaluation report:** [`reports/evaluation/summary.md`](reports/evaluation/summary.md) · **Model card:** [`docs/model_card.md`](docs/model_card.md)
 
+![Churn Signal overview](docs/assets/app_overview.png)
 
-# <div align="center">Telecom Customer Churn Prediction</div>
+## Results at a glance
 
-![Intro](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/customer%20churn.jpeg?raw=true)
+| Metric | Result |
+| --- | --- |
+| Dataset | 7,043 customers · 21 raw columns · 26.54% observed churn |
+| Selected model | Logistic regression |
+| Selection rule | Best 5-fold stratified CV ROC-AUC |
+| CV ROC-AUC | **0.8474** ± 0.0110 |
+| Holdout ROC-AUC | **0.8457** |
+| Outreach threshold | **0.583**, tuned on out-of-fold predictions |
+| Holdout precision | **54.9%** |
+| Holdout recall | **72.2%** |
+| Holdout F1 | **0.624** |
+| Top-decile churn capture | **28.6%** of churners · **2.86×** lift |
+| Observed annualised churn revenue | **$1.67M** |
 
+The model flags 492 of 1,409 holdout customers at the selected threshold (34.9%). It catches 270 of 374 churners while contacting 222 retained customers — a deliberate trade-off chosen for a retention campaign, not for raw accuracy.
 
+## Why this is a useful ML project
 
-## What is Customer Churn?
-Customer churn is defined as when customers or subscribers discontinue doing business with a firm or service.
+- **One deterministic pipeline** from raw CSV to a serialized model, metrics, test predictions, and figures.
+- **Leakage-aware evaluation**: preprocessing lives inside the model pipeline, the threshold is tuned on out-of-fold training predictions, and the holdout set is touched once.
+- **A real decision surface**: the app lets a user move the threshold and see precision, recall, contact volume, and campaign economics change.
+- **A deployable product**: Streamlit workbench, CSV batch scoring, a static Pages showcase, Docker, and GitHub Actions.
+- **A clear model card**: intended use, evaluation, and limitations are documented rather than hidden behind a single accuracy number.
 
-Customers in the telecom industry can choose from a variety of service providers and actively switch from one to the next. The telecommunications business has an annual churn rate of 15-25 percent in this highly competitive market.
+## What the data says
 
-Individualized customer retention is tough because most firms have a large number of customers and can't afford to devote much time to each of them. The costs would be too great, outweighing the additional revenue. However, if a corporation could forecast which customers are likely to leave ahead of time, it could focus customer retention efforts only on these "high risk" clients. The ultimate goal is to expand its coverage area and retrieve more customers loyalty. The core to succeed in this market lies in the customer itself.
+Churn is concentrated. Month-to-month contracts churn at **42.7%** versus **11.3%** on one-year and **2.8%** on two-year contracts. The first six months are the highest-risk lifecycle stage at **52.9%**, and fiber-optic customers churn at **41.9%**.
 
-Customer churn is a critical metric because it is much less expensive to retain existing customers than it is to acquire new customers.
+These segments overlap, which is why a focused campaign can reach a large share of the exposure:
 
-To detect early signs of potential churn, one must first develop a holistic view of the customers and their interactions across numerous channels.As a result, by addressing churn, these businesses may not only preserve their market position, but also grow and thrive. More customers they have in their network, the lower the cost of initiation and the larger the profit. As a result, the company's key focus for success is reducing client attrition and implementing effective retention strategy.
-## Objectives:
-- Finding the % of Churn Customers and customers that keep in with the active services.
-- Analysing the data in terms of various features responsible for customer Churn
-- Finding a most suited machine learning model for correct classification of Churn and non churn customers.
+- Month-to-month customers are **55.0%** of the base but **88.5%** of observed churners.
+- Fiber-optic customers are **44.0%** of the base but **69.4%** of churners.
+- Electronic-check customers are **33.6%** of the base but **57.3%** of churners.
+- The overlap is the sharpest target: month-to-month fiber accounts are **30.2%** of the base, churn at **54.6%**, and represent **62.2%** of churners and **72.2%** of annualised observed churn revenue.
 
-## Dataset:
- [Telco Customer Churn](https://www.kaggle.com/bhartiprasad17/customer-churn-prediction/data)
+![Churn overview](reports/figures/churn_overview.png)
 
-### The data set includes information about:
+![Segment risk profile](reports/figures/segment_risk_profile.png)
 
-- Customers who left within the last month – the column is called Churn
-- Services that each customer has signed up for – phone, multiple lines, internet, online security, online backup, device protection, tech support, and streaming TV and movies
-- Customer account information – how long they’ve been a customer, contract, payment method, paperless billing, monthly charges, and total charges
-- Demographic info about customers – gender, age range, and if they have partners and dependents
-## Implementation:
+The recommended retention plays are therefore specific: annual-contract incentives for the right month-to-month accounts, a structured first-90-days onboarding motion, and a fiber service-quality / price-to-value review. These are prioritisation hypotheses tied to observable account facts, not proven causal interventions.
 
-**Libraries:** sklearn, Matplotlib, pandas, seaborn, and NumPy
+## The product
 
+Churn Signal has five pages:
 
+| Page | What it does |
+| --- | --- |
+| **Overview** | Business KPIs, churn concentration, segment scorecard, and retention plays. |
+| **Customer risk scorer** | Scores a single account, shows risk band, revenue exposure, one-at-a-time drivers, and suggested actions. |
+| **Batch scoring** | Uploads a CSV, validates the schema, scores every customer, and exports the result. |
+| **Model performance** | Replays the holdout evaluation, compares candidates, and lets you test a different outreach threshold. |
+| **Method & limits** | Model card, data dictionary, reproduction steps, and responsible-use notes. |
 
-## Few glimpses of EDA:
-### 1. Churn distribution:
+The scorer is interactive: change tenure, contract, services, or billing facts and see the probability and retention recommendation update. The explanation is a transparent sensitivity check against training-set baselines — useful for prioritisation, not proof of causation.
 
-> ![Churn distribution](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Churn%20Distribution.png?raw=true)
-> 26.6 % of customers switched to another firm.
+![Customer risk scorer](docs/assets/app_scorer.png)
 
-### 2. Churn distribution with respect to gender:
-> ![Churn distribution wrt Gender](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/distributionWRTGender.PNG?raw=true)
+## How the pipeline works
 
-
-> There is negligible difference in customer percentage/count who chnaged the service provider. Both genders behaved in similar fashion when it comes to migrating to another service provider/firm.`
-
-### 3. Customer Contract distribution:
-> ![Customer contract distribution](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Contract%20distribution.png?raw=true)
-> About 75% of customer with Month-to-Month Contract opted to move out as compared to 13% of customrs with One Year Contract and 3% with Two Year Contract
-
-### 4. Payment Methods:
-> ![Distribution of Payments methods](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/payment%20methods.png?raw=true) ![Churn wrt payment methods](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/payment%20ethods%20with%20respectto%20churn.PNG?raw=true)
-
-> Major customers who moved out were having Electronic Check as Payment Method.
-> Customers who opted for Credit-Card automatic transfer or Bank Automatic Transfer and Mailed Check as Payment Method were less likely to move out.
-
-### 5. Internet services:
-
-> Several customers choose the Fiber optic service and it's also evident that the customers who use Fiber optic have high churn rate, this might suggest a dissatisfaction with this type of internet service.
-> Customers having DSL service are majority in number and have less churn rate compared to Fibre optic service.
-![Churn distribution w.r.t Internet services and Gender](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/internet%20services.PNG?raw=true)
-
-### 6. Dependent distribution:
-
-> Customers without dependents are more likely to churn.
-![Churn distribution w.r.t dependents](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/dependents.PNG?raw=true)
-
-### 7. Online Security:
-
-> As shown in following graph, most customers churn due to lack of online security
-![Churn distribution w.r.t online security](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/onlineSecurity.PNG?raw=true)
-
-### 8. Senior Citizen:
-
-> Most of the senior citizens churn; the number of senior citizens are very less in over all customer base.
-![Churn distribution w.r.t Senior Citizen](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/seniorCitzen.PNG?raw=true)
-
-### 9. Paperless Billing:
-
-> Customers with Paperless Billing are most likely to churn.
-![Churn distribution w.r.t mode of billing](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/billing.PNG?raw=true)
-
-### 10. Tech support:
-
-> As shown in following chart, customers with no TechSupport are most likely to migrate to another service provider.
-![Churn distribution w.r.t Tech support](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/techSupport.PNG?raw=true)
-
-### 11. Distribution w.r.t Charges and Tenure:
-> ![Monthly Charges](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/carges%20distribution.PNG?raw=true)
-> ![Total Charges](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/total%20charges.PNG?raw=true)
-> ![Tenure](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/tenure%20and%20churn.PNG?raw=true)
-
-> Customers with higher Monthly Charges are also more likely to churn.<br>
-> New customers are more likely to churn.
-
-## Machine Learning Model Evaluations and Predictions:
-![ML Algorithms](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Model%20evaluation.PNG?raw=true)
-
-#### Results after K fold cross validation:
-
-![Logistic Regression](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/LR.PNG?raw=true) 
-![KNN](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/KNN.PNG?raw=true)
-![Naive Bayes](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Naive%20Bayes.PNG?raw=true)
-![Decision Tree](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Decision%20trees.PNG?raw=true)
-![Random Forest](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Random%20Forest.PNG?raw=true)
-![Adaboost](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Adaboost.PNG?raw=true)
-![Gradient Boost](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Gradient%20boost.PNG?raw=true)
-![Voting Classifier](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/Voting%20Classifier.PNG?raw=true)
-
-![Confusion Matrix](https://github.com/Pradnya1208/Telecom-Customer-Churn-prediction/blob/main/output/confusion_matrix_models.PNG?raw=true)
-#### Final Model: Voting Classifier
-* We have selected Gradient boosting, Logistic Regression, and Adaboost for our Voting Classifier.
+```text
+data/raw/telco_churn.csv
+        │
+        ▼
+schema validation + explicit TotalCharges handling
+        │
+        ▼
+feature engineering
+  AvgMonthlySpend · ServiceCount · IsNewCustomer
+        │
+        ▼
+5 candidate pipelines × 5-fold stratified CV
+  logistic regression · random forest · gradient boosting
+  histogram gradient boosting · extra trees
+        │
+        ▼
+select by CV ROC-AUC
+        │
+        ▼
+tune F1 threshold on out-of-fold training predictions
+        │
+        ▼
+one holdout evaluation (ROC-AUC, PR-AUC, Brier, confusion matrix)
+        │
+        ▼
+refit the winning pipeline on all labelled rows
+        │
+        ▼
+models/churn_model.joblib + models/metrics.json
+reports/evaluation/*.csv + reports/figures/*.png
 ```
-    from sklearn.ensemble import VotingClassifier
-    clf1 = GradientBoostingClassifier()
-    clf2 = LogisticRegression()
-    clf3 = AdaBoostClassifier()
-    eclf1 = VotingClassifier(estimators=[('gbc', clf1), ('lr', clf2), ('abc', clf3)], voting='soft')
-    eclf1.fit(X_train, y_train)
-    predictions = eclf1.predict(X_test)
-    print("Final Accuracy Score ")
-    print(accuracy_score(y_test, predictions))
+
+The cleaning step is intentionally explicit. The source file has **11 blank `TotalCharges` values**, all for customers with `tenure=0`; those are filled from `MonthlyCharges × tenure`, which is zero. `SeniorCitizen` is normalised from `0/1` to `No/Yes`. The original 21-column schema is preserved for batch scoring, while the model uses 22 engineered features (categorical values are one-hot encoded inside the pipeline).
+
+## Model comparison
+
+| Candidate | CV ROC-AUC | Holdout ROC-AUC | Holdout F1 @ 0.5 |
+| --- | ---: | ---: | ---: |
+| **Logistic regression** | **0.8474** | **0.8457** | 0.6175 |
+| Gradient boosting | 0.8456 | 0.8438 | 0.5904 |
+| Random forest | 0.8429 | 0.8376 | 0.6135 |
+| Histogram gradient boosting | 0.8313 | 0.8288 | 0.5690 |
+| Extra trees | 0.8284 | 0.8253 | 0.5868 |
+
+Logistic regression wins by CV ROC-AUC and is also the simplest model to explain, serialize, and monitor. Gradient boosting is close but does not improve the ranking metric on this dataset. The full comparison and figures are regenerated by `python -m churn.train`.
+
+![Model comparison](reports/figures/model_comparison.png)
+
+### Decision policy
+
+The default threshold is **0.583**, selected to maximise F1 on out-of-fold training predictions. On the untouched holdout set:
+
+| | Predicted retain | Predicted churn |
+| --- | ---: | ---: |
+| **Actually retained** | 813 | 222 |
+| **Actually churned** | 104 | 270 |
+
+A lower threshold contacts more customers and catches more churners; a higher threshold protects outreach capacity. The **Model performance** page exposes this slider so the policy can be discussed explicitly rather than buried in a notebook.
+
+## Quickstart
+
+### Local environment
+
+```bash
+git clone https://github.com/mlaharsh/Customer_Churn_Prediction.git
+cd Customer_Churn_Prediction
+python -m venv .venv
 ```
+
+Windows:
+
+```powershell
+.venv\Scripts\activate
+python -m pip install -r requirements-dev.txt
+python -m churn.train
+streamlit run app.py
 ```
-Final Score 
-{'LogisticRegression': [0.841331397558646, 0.010495252078550477],
- 'KNeighborsClassifier': [0.7913242024807321, 0.008198993337848612],
- 'GaussianNB': [0.8232386881685605, 0.00741678015498337],
- 'DecisionTreeClassifier': [0.6470213137060805, 0.02196953973039052],
- 'RandomForestClassifier': [0.8197874155380965, 0.011556155864106703],
- 'AdaBoostClassifier': [0.8445838813774079, 0.01125665302188384],
- 'GradientBoostingClassifier': [0.844630629931458, 0.010723107447558198],
- 'VotingClassifier': [0.8468096379573085, 0.010887508320460332]}
 
+macOS / Linux:
+
+```bash
+source .venv/bin/activate
+python -m pip install -r requirements-dev.txt
+python -m churn.train
+streamlit run app.py
 ```
-* Final confusion matrix we got:
-From the confusion matrix we can see that: There are total 1383+166=1549 actual non-churn values and the algorithm predicts 1400 of them as non churn and 149 of them as churn. While there are 280+280=561 actual churn values and the algorithm predicts 280 of them as non churn values and 281 of them as churn values.
-## Optimizations
 
-We could use Hyperparamete Tuning or Feature enginnering methods to improve the accuracy further.
+Open `http://localhost:8501`. Training takes about a minute on a laptop and rewrites `models/` and `reports/`. The committed artifacts are sufficient to run the app without retraining.
 
+### Tests
 
-### Feedback
+```bash
+python -m pytest -q
+```
 
-If you have any feedback, please reach out at mlabetu@gmail.com
+The suite covers the data contract, cleaning edge cases, preprocessing, risk bands, scoring, explanations, model serialization, the committed evaluation artifacts, and headless rendering of all five app pages.
 
+### Docker
 
+```bash
+docker build -t churn-signal .
+docker run --rm -p 8501:8501 churn-signal
+```
 
+Open `http://localhost:8501`.
+
+## Batch scoring
+
+Use the **Batch scoring** page to upload a CSV. The template is available in the app and in `data/raw/telco_churn.csv` (drop the `Churn` column).
+
+Required columns are the 19 raw feature columns plus an optional `customerID`:
+
+```text
+customerID, gender, SeniorCitizen, Partner, Dependents, tenure, PhoneService,
+MultipleLines, InternetService, OnlineSecurity, OnlineBackup, DeviceProtection,
+TechSupport, StreamingTV, StreamingMovies, Contract, PaperlessBilling,
+PaymentMethod, MonthlyCharges, TotalCharges
+```
+
+- Missing customer IDs are generated as `row-1`, `row-2`, and so on.
+- `Churn` is optional and ignored if present.
+- Blank `TotalCharges` is filled as `MonthlyCharges × tenure`; for a new customer with `tenure=0`, that is zero.
+- Duplicate customer IDs are rejected.
+- A maximum of 50,000 rows is accepted in the interactive app.
+
+The download contains the probability, risk tier, outreach flag, expected annual revenue at risk, and the original account facts needed to work the list.
+
+## Repository layout
+
+```text
+.
+├── app.py                         # Streamlit workbench
+├── churn/
+│   ├── config.py                  # paths, feature lists, risk bands, palette
+│   ├── data.py                    # schema validation, cleaning, inference prep
+│   ├── features.py                # shared scikit-learn preprocessor
+│   ├── insights.py                # scoring, risk tiers, what-if explanations
+│   ├── modeling.py                # candidates, CV, threshold tuning, serialization
+│   ├── reporting.py               # evaluation figures and tables
+│   └── train.py                   # reproducible CLI entry point
+├── data/raw/telco_churn.csv       # canonical public dataset
+├── models/
+│   ├── churn_model.joblib         # deployable bundle
+│   ├── metrics.json               # generated metrics and segment tables
+│   └── feature_importance.csv
+├── reports/
+│   ├── evaluation/                # summary, predictions, deciles, comparison
+│   └── figures/                   # generated PNGs used in docs/README
+├── notebooks/legacy_churn_analysis.ipynb
+├── tests/
+├── docs/
+│   ├── index.html                 # static GitHub Pages showcase
+│   ├── assets/                    # screenshots and copied figures
+│   ├── model_card.md
+│   ├── data_dictionary.md
+│   └── deployment.md
+├── .github/workflows/
+│   ├── ci.yml                     # tests, rebuild, Streamlit smoke test
+│   └── pages.yml                  # GitHub Pages deployment
+├── Dockerfile
+├── requirements.txt
+├── requirements-dev.txt
+└── pyproject.toml
+```
+
+The original notebook is preserved at `notebooks/legacy_churn_analysis.ipynb` as historical context. It is not part of the production path; the reproducible pipeline in `churn/` is the source of truth.
+
+## Deployment
+
+### GitHub Pages
+
+The static showcase is deployed from `docs/` by `.github/workflows/pages.yml`. On a push to `master` that changes `docs/`, GitHub Actions uploads the folder as a Pages artifact and deploys it.
+
+Live URL: **https://mlaharsh.github.io/Customer_Churn_Prediction/**
+
+### Streamlit Community Cloud
+
+The app is designed for a zero-secret Streamlit Community Cloud deployment:
+
+1. Push the repository to GitHub.
+2. Sign in to [share.streamlit.io](https://share.streamlit.io) with GitHub.
+3. Create a new app from `mlaharsh/Customer_Churn_Prediction`, branch `master`, main file `app.py`.
+4. Select Python 3.11 and deploy.
+
+No environment variables are required; the app reads the committed model and evaluation artifacts. Step-by-step instructions, including Docker and local alternatives, are in [`docs/deployment.md`](docs/deployment.md). The Streamlit app is not claimed as publicly deployed in this README unless a live URL is added above.
+
+### CI
+
+`.github/workflows/ci.yml` runs:
+
+- the pytest suite on Python 3.11 and 3.12;
+- a two-fold training run that verifies the artifact export path;
+- a Streamlit health-check smoke test.
+
+The Pages workflow is separate, so documentation changes do not block model CI.
+
+## Method notes
+
+**No leakage.** The scalar, one-hot encoder, and model are one `Pipeline`. Cross-validation refits preprocessing inside each fold. The threshold is tuned on out-of-fold predictions from the training split. The holdout set is used once for the final evaluation, then the selected pipeline is refit on all labelled rows for deployment.
+
+**Reproducibility.** `RANDOM_STATE = 42`, a stratified 80/20 split, fixed candidate hyperparameters, and a deterministic cleaning policy. Generated artifacts are committed so the app can run immediately; retraining rewrites them.
+
+**Why the threshold matters.** A churn model produces a ranking, not a campaign. The threshold converts ranking into contact volume. The app exposes the precision/recall/contact-volume trade-off and the resulting expected revenue exposure, so the operating point can be chosen against a real retention capacity constraint.
+
+**Metrics are retrospective.** The holdout is a single historical split, not a temporal validation. The historical Telco dataset may not represent a current customer population, and the model does not estimate uplift from a retention offer.
+
+## Limitations and responsible use
+
+- **Retrospective evaluation only.** No temporal holdout or live A/B test has been run. A production deployment should validate on a time-based split and track drift.
+- **Correlation, not causation.** The what-if explanations reset one feature to a baseline; they do not answer “what happens if we change this customer’s contract?”
+- **No uplift model.** The model predicts churn risk, not the probability that an offer will save the customer. Pair it with a holdout or matched control group before claiming saved revenue.
+- **Fairness review is required.** Gender and senior-citizen status are present in the source schema. They are not used to make credit, pricing, or eligibility decisions here, but any production use should audit subgroup performance and business impact.
+- **Calibration is imperfect.** The Brier score is 0.1657; probabilities are useful for ranking and campaign sizing but should not be read as exact individual odds.
+- **Dataset provenance.** This is a public, anonymised IBM/Kaggle Telco dataset. See the source link below and [`docs/data_dictionary.md`](docs/data_dictionary.md).
+
+## License
+
+MIT. See [`LICENSE`](LICENSE).
+
+## Acknowledgements
+
+- Dataset: [IBM Telco Customer Churn on Kaggle](https://www.kaggle.com/datasets/blastchar/telco-customer-churn).
+- The original exploratory notebook is preserved for context; the production implementation, tests, app, and documentation are this repository's reproducible rebuild.
+- Built with scikit-learn, pandas, Streamlit, Plotly, pytest, and GitHub Actions.

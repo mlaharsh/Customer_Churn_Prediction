@@ -1,0 +1,504 @@
+{
+  "generated_at": "2026-10-26T14:58:33.435154+00:00",
+  "dataset": {
+    "source": "IBM Telco Customer Churn (public Kaggle dataset)",
+    "rows": 7043,
+    "columns": 21,
+    "modeled_columns": 24,
+    "customers": 7043,
+    "churners": 1869,
+    "retained": 5174,
+    "churn_rate": 0.2654,
+    "average_tenure_months": 32.37,
+    "median_tenure_months": 29.0,
+    "average_monthly_charges": 64.76,
+    "monthly_revenue": 456116.6,
+    "annual_revenue": 5473399.2,
+    "monthly_churn_revenue": 139130.85,
+    "annual_churn_revenue": 1669570.2,
+    "priority_segment": {
+      "name": "Month-to-month \u00b7 Fiber optic",
+      "customers": 2128,
+      "churners": 1162,
+      "churn_rate": 0.5461,
+      "share_of_customers": 0.3021,
+      "share_of_churners": 0.6217,
+      "monthly_churn_revenue": 100482.0,
+      "annual_churn_revenue": 1205784.0,
+      "share_of_churn_revenue": 0.7222
+    }
+  },
+  "selected_model": "logistic_regression",
+  "selected_model_display": "Logistic regression",
+  "decision_threshold": 0.583,
+  "risk_bands": [
+    {
+      "name": "Low",
+      "min": 0.0,
+      "max": 0.3,
+      "color": "#2A9D8F"
+    },
+    {
+      "name": "Medium",
+      "min": 0.3,
+      "max": 0.55,
+      "color": "#E9C46A"
+    },
+    {
+      "name": "High",
+      "min": 0.55,
+      "max": 0.75,
+      "color": "#F4A261"
+    },
+    {
+      "name": "Critical",
+      "min": 0.75,
+      "max": 1.01,
+      "color": "#E76F51"
+    }
+  ],
+  "model_comparison": [
+    {
+      "model": "logistic_regression",
+      "display_name": "Logistic regression",
+      "cv_roc_auc": 0.8474,
+      "cv_roc_auc_std": 0.011,
+      "cv_accuracy": 0.7528,
+      "cv_precision": 0.5223,
+      "cv_recall": 0.8,
+      "cv_f1": 0.6318,
+      "test_roc_auc": 0.8457,
+      "test_pr_auc": 0.6532,
+      "test_f1_at_0_5": 0.6175,
+      "test_recall_at_0_5": 0.7941,
+      "selected": true,
+      "tuned_threshold": 0.583,
+      "test_f1_tuned": 0.6236,
+      "test_recall_tuned": 0.7219
+    },
+    {
+      "model": "gradient_boosting",
+      "display_name": "Gradient boosting",
+      "cv_roc_auc": 0.8456,
+      "cv_roc_auc_std": 0.0115,
+      "cv_accuracy": 0.8012,
+      "cv_precision": 0.6591,
+      "cv_recall": 0.5211,
+      "cv_f1": 0.5815,
+      "test_roc_auc": 0.8438,
+      "test_pr_auc": 0.6555,
+      "test_f1_at_0_5": 0.5904,
+      "test_recall_at_0_5": 0.5241
+    },
+    {
+      "model": "random_forest",
+      "display_name": "Random forest",
+      "cv_roc_auc": 0.8429,
+      "cv_roc_auc_std": 0.0083,
+      "cv_accuracy": 0.7888,
+      "cv_precision": 0.5885,
+      "cv_recall": 0.6783,
+      "cv_f1": 0.6299,
+      "test_roc_auc": 0.8376,
+      "test_pr_auc": 0.6478,
+      "test_f1_at_0_5": 0.6135,
+      "test_recall_at_0_5": 0.6791
+    },
+    {
+      "model": "hist_gradient_boosting",
+      "display_name": "Histogram gradient boosting",
+      "cv_roc_auc": 0.8313,
+      "cv_roc_auc_std": 0.0074,
+      "cv_accuracy": 0.7925,
+      "cv_precision": 0.6351,
+      "cv_recall": 0.5144,
+      "cv_f1": 0.5682,
+      "test_roc_auc": 0.8288,
+      "test_pr_auc": 0.6249,
+      "test_f1_at_0_5": 0.569,
+      "test_recall_at_0_5": 0.5294
+    },
+    {
+      "model": "extra_trees",
+      "display_name": "Extra trees",
+      "cv_roc_auc": 0.8284,
+      "cv_roc_auc_std": 0.0111,
+      "cv_accuracy": 0.776,
+      "cv_precision": 0.5649,
+      "cv_recall": 0.6783,
+      "cv_f1": 0.6163,
+      "test_roc_auc": 0.8253,
+      "test_pr_auc": 0.6342,
+      "test_f1_at_0_5": 0.5868,
+      "test_recall_at_0_5": 0.6551
+    }
+  ],
+  "test_metrics": {
+    "threshold": 0.583,
+    "accuracy": 0.7686,
+    "precision": 0.5488,
+    "recall": 0.7219,
+    "f1": 0.6236,
+    "roc_auc": 0.8457,
+    "pr_auc": 0.6532,
+    "brier": 0.1657,
+    "log_loss": 0.4909,
+    "specificity": 0.7855,
+    "negative_predictive_value": 0.8866,
+    "alert_rate": 0.3492,
+    "churners_flagged": 270,
+    "churners_missed": 104,
+    "non_churners_contacted": 222,
+    "top_decile_capture": 0.2861,
+    "top_decile_precision": 0.7589,
+    "top_decile_lift": 2.86,
+    "confusion_matrix": {
+      "true_negative": 813,
+      "false_positive": 222,
+      "false_negative": 104,
+      "true_positive": 270
+    },
+    "prevalence": 0.2654
+  },
+  "segments": {
+    "contract": [
+      {
+        "segment": "Month-to-month",
+        "customers": 3875,
+        "churners": 1655,
+        "monthly_revenue": 257294.15,
+        "monthly_churn_revenue": 120847.1,
+        "annual_churn_revenue": 1450165.2,
+        "churn_rate": 0.4271
+      },
+      {
+        "segment": "One year",
+        "customers": 1473,
+        "churners": 166,
+        "monthly_revenue": 95816.6,
+        "monthly_churn_revenue": 14118.45,
+        "annual_churn_revenue": 169421.4,
+        "churn_rate": 0.1127
+      },
+      {
+        "segment": "Two year",
+        "customers": 1695,
+        "churners": 48,
+        "monthly_revenue": 103005.85,
+        "monthly_churn_revenue": 4165.3,
+        "annual_churn_revenue": 49983.6,
+        "churn_rate": 0.0283
+      }
+    ],
+    "internet_service": [
+      {
+        "segment": "Fiber optic",
+        "customers": 3096,
+        "churners": 1297,
+        "monthly_revenue": 283284.4,
+        "monthly_churn_revenue": 114300.05,
+        "annual_churn_revenue": 1371600.6,
+        "churn_rate": 0.4189
+      },
+      {
+        "segment": "DSL",
+        "customers": 2421,
+        "churners": 459,
+        "monthly_revenue": 140665.35,
+        "monthly_churn_revenue": 22529.2,
+        "annual_churn_revenue": 270350.4,
+        "churn_rate": 0.1896
+      },
+      {
+        "segment": "No",
+        "customers": 1526,
+        "churners": 113,
+        "monthly_revenue": 32166.85,
+        "monthly_churn_revenue": 2301.6,
+        "annual_churn_revenue": 27619.2,
+        "churn_rate": 0.074
+      }
+    ],
+    "payment_method": [
+      {
+        "segment": "Electronic check",
+        "customers": 2365,
+        "churners": 1071,
+        "monthly_revenue": 180345.0,
+        "monthly_churn_revenue": 84288.75,
+        "annual_churn_revenue": 1011465.0,
+        "churn_rate": 0.4529
+      },
+      {
+        "segment": "Mailed check",
+        "customers": 1612,
+        "churners": 308,
+        "monthly_revenue": 70794.3,
+        "monthly_churn_revenue": 16803.6,
+        "annual_churn_revenue": 201643.2,
+        "churn_rate": 0.1911
+      },
+      {
+        "segment": "Bank transfer (automatic)",
+        "customers": 1544,
+        "churners": 258,
+        "monthly_revenue": 103745.45,
+        "monthly_churn_revenue": 20091.9,
+        "annual_churn_revenue": 241102.8,
+        "churn_rate": 0.1671
+      },
+      {
+        "segment": "Credit card (automatic)",
+        "customers": 1522,
+        "churners": 232,
+        "monthly_revenue": 101231.85,
+        "monthly_churn_revenue": 17946.6,
+        "annual_churn_revenue": 215359.2,
+        "churn_rate": 0.1524
+      }
+    ],
+    "tenure_band": [
+      {
+        "segment": "0-6 months",
+        "customers": 1481,
+        "churners": 784,
+        "monthly_revenue": 81067.95,
+        "monthly_churn_revenue": 49896.1,
+        "annual_churn_revenue": 598753.2,
+        "churn_rate": 0.5294
+      },
+      {
+        "segment": "7-12 months",
+        "customers": 705,
+        "churners": 253,
+        "monthly_revenue": 41561.8,
+        "monthly_churn_revenue": 19058.15,
+        "annual_churn_revenue": 228697.8,
+        "churn_rate": 0.3589
+      },
+      {
+        "segment": "13-24 months",
+        "customers": 1024,
+        "churners": 294,
+        "monthly_revenue": 62829.85,
+        "monthly_churn_revenue": 23081.65,
+        "annual_churn_revenue": 276979.8,
+        "churn_rate": 0.2871
+      },
+      {
+        "segment": "25-36 months",
+        "customers": 832,
+        "churners": 180,
+        "monthly_revenue": 54558.8,
+        "monthly_churn_revenue": 15167.95,
+        "annual_churn_revenue": 182015.4,
+        "churn_rate": 0.2163
+      },
+      {
+        "segment": "37-48 months",
+        "customers": 762,
+        "churners": 145,
+        "monthly_revenue": 50534.5,
+        "monthly_churn_revenue": 12294.55,
+        "annual_churn_revenue": 147534.6,
+        "churn_rate": 0.1903
+      },
+      {
+        "segment": "49-60 months",
+        "customers": 832,
+        "churners": 120,
+        "monthly_revenue": 58698.25,
+        "monthly_churn_revenue": 10581.9,
+        "annual_churn_revenue": 126982.8,
+        "churn_rate": 0.1442
+      },
+      {
+        "segment": "61-72 months",
+        "customers": 1407,
+        "churners": 93,
+        "monthly_revenue": 106865.45,
+        "monthly_churn_revenue": 9050.55,
+        "annual_churn_revenue": 108606.6,
+        "churn_rate": 0.0661
+      }
+    ]
+  },
+  "feature_importance": [
+    {
+      "feature": "tenure",
+      "importance_mean": 0.04852,
+      "importance_std": 0.002621,
+      "importance_share": 0.21234
+    },
+    {
+      "feature": "InternetService",
+      "importance_mean": 0.044597,
+      "importance_std": 0.008214,
+      "importance_share": 0.195174
+    },
+    {
+      "feature": "Contract",
+      "importance_mean": 0.04324,
+      "importance_std": 0.004895,
+      "importance_share": 0.189234
+    },
+    {
+      "feature": "MonthlyCharges",
+      "importance_mean": 0.042013,
+      "importance_std": 0.00609,
+      "importance_share": 0.183862
+    },
+    {
+      "feature": "IsNewCustomer",
+      "importance_mean": 0.019226,
+      "importance_std": 0.002273,
+      "importance_share": 0.084138
+    },
+    {
+      "feature": "ServiceCount",
+      "importance_mean": 0.006032,
+      "importance_std": 0.002063,
+      "importance_share": 0.026397
+    },
+    {
+      "feature": "OnlineSecurity",
+      "importance_mean": 0.004581,
+      "importance_std": 0.001215,
+      "importance_share": 0.020047
+    },
+    {
+      "feature": "TechSupport",
+      "importance_mean": 0.004223,
+      "importance_std": 0.000922,
+      "importance_share": 0.01848
+    },
+    {
+      "feature": "PaymentMethod",
+      "importance_mean": 0.002808,
+      "importance_std": 0.001482,
+      "importance_share": 0.01229
+    },
+    {
+      "feature": "StreamingMovies",
+      "importance_mean": 0.002588,
+      "importance_std": 0.001602,
+      "importance_share": 0.011326
+    },
+    {
+      "feature": "StreamingTV",
+      "importance_mean": 0.002388,
+      "importance_std": 0.001968,
+      "importance_share": 0.010452
+    },
+    {
+      "feature": "OnlineBackup",
+      "importance_mean": 0.002105,
+      "importance_std": 0.001606,
+      "importance_share": 0.009213
+    },
+    {
+      "feature": "PaperlessBilling",
+      "importance_mean": 0.002063,
+      "importance_std": 0.001299,
+      "importance_share": 0.00903
+    },
+    {
+      "feature": "DeviceProtection",
+      "importance_mean": 0.001437,
+      "importance_std": 0.001093,
+      "importance_share": 0.006288
+    },
+    {
+      "feature": "MultipleLines",
+      "importance_mean": 0.00116,
+      "importance_std": 0.000868,
+      "importance_share": 0.005077
+    },
+    {
+      "feature": "SeniorCitizen",
+      "importance_mean": 0.000971,
+      "importance_std": 0.000369,
+      "importance_share": 0.004248
+    },
+    {
+      "feature": "Dependents",
+      "importance_mean": 0.000423,
+      "importance_std": 0.000909,
+      "importance_share": 0.00185
+    },
+    {
+      "feature": "PhoneService",
+      "importance_mean": 9e-05,
+      "importance_std": 0.000121,
+      "importance_share": 0.000392
+    },
+    {
+      "feature": "Partner",
+      "importance_mean": 3.7e-05,
+      "importance_std": 0.000193,
+      "importance_share": 0.000162
+    },
+    {
+      "feature": "AvgMonthlySpend",
+      "importance_mean": 0.0,
+      "importance_std": 0.000569,
+      "importance_share": 0.0
+    },
+    {
+      "feature": "TotalCharges",
+      "importance_mean": 0.0,
+      "importance_std": 0.000572,
+      "importance_share": 0.0
+    },
+    {
+      "feature": "gender",
+      "importance_mean": 0.0,
+      "importance_std": 0.000101,
+      "importance_share": 0.0
+    }
+  ],
+  "versions": {
+    "python": "3.12.6",
+    "scikit_learn": "1.6.1",
+    "pandas": "2.2.3",
+    "numpy": "2.2.2",
+    "joblib": "1.4.2"
+  },
+  "split": {
+    "test_size": 0.2,
+    "random_state": 42,
+    "stratified": true
+  },
+  "test_metrics_at_default_threshold": {
+    "threshold": 0.5,
+    "accuracy": 0.7388,
+    "precision": 0.5051,
+    "recall": 0.7941,
+    "f1": 0.6175,
+    "roc_auc": 0.8457,
+    "pr_auc": 0.6532,
+    "brier": 0.1657,
+    "log_loss": 0.4909,
+    "specificity": 0.7188,
+    "negative_predictive_value": 0.9062,
+    "alert_rate": 0.4173,
+    "churners_flagged": 297,
+    "churners_missed": 77,
+    "non_churners_contacted": 291,
+    "top_decile_capture": 0.2861,
+    "top_decile_precision": 0.7589,
+    "top_decile_lift": 2.86,
+    "confusion_matrix": {
+      "true_negative": 744,
+      "false_positive": 291,
+      "false_negative": 77,
+      "true_positive": 297
+    },
+    "prevalence": 0.2654
+  },
+  "artifact": {
+    "path": "models\\churn_model.joblib",
+    "fit_scope": "all labeled rows (after holdout evaluation)",
+    "random_state": 42
+  }
+}

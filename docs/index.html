@@ -1,0 +1,1606 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Churn Signal — Customer Churn Prediction</title>
+<meta name="description" content="A reproducible churn model and retention workbench built on 7,043 IBM Telco customers. 0.846 holdout ROC-AUC, an explicit contact policy, and the limits in plain sight.">
+<meta name="theme-color" content="#0B1F33">
+<meta property="og:title" content="Churn Signal — Customer Churn Prediction">
+<meta property="og:description" content="A reproducible churn model and retention workbench on the IBM Telco dataset. 0.846 holdout ROC-AUC, an explicit decision policy, and a full evaluation.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://mlaharsh.github.io/Customer_Churn_Prediction/">
+<meta property="og:image" content="https://mlaharsh.github.io/Customer_Churn_Prediction/assets/app_overview.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230B1F33'/%3E%3Cpath d='M32 12l16 20-16 20-16-20z' fill='%238ED7D2'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --ink: #0B1F33;
+    --ink-soft: #14384B;
+    --teal: #0E7C86;
+    --teal-deep: #0A6570;
+    --mint: #2A9D8F;
+    --mint-light: #8ED7D2;
+    --coral: #E76F51;
+    --amber: #E9C46A;
+    --cream: #F7F5F0;
+    --cream-deep: #F0EDE6;
+    --paper: #FFFFFF;
+    --muted: #61717B;
+    --muted-light: #8EA9B5;
+    --line: #E1E6E9;
+    --line-dark: rgba(255, 255, 255, 0.12);
+    --max: 1180px;
+    --shadow: 0 18px 50px rgba(11, 31, 51, 0.08);
+    --font: "Segoe UI", "Inter", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    --mono: "Cascadia Code", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: var(--font);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  img { max-width: 100%; }
+  a { color: inherit; }
+  ::selection { background: rgba(42, 157, 143, 0.24); }
+
+  .wrap {
+    width: min(var(--max), calc(100% - 48px));
+    margin-inline: auto;
+  }
+
+  .skip {
+    position: absolute;
+    left: 16px;
+    top: -100px;
+    z-index: 100;
+    background: var(--paper);
+    color: var(--ink);
+    padding: 10px 16px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    box-shadow: var(--shadow);
+    transition: top 0.2s ease;
+  }
+  .skip:focus { top: 14px; }
+
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(247, 245, 240, 0.9);
+    border-bottom: 1px solid rgba(11, 31, 51, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .header-inner {
+    min-height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    font-weight: 750;
+    letter-spacing: -0.02em;
+    font-size: 1rem;
+    white-space: nowrap;
+  }
+  .brand-mark {
+    width: 29px;
+    height: 29px;
+    display: grid;
+    place-items: center;
+    border-radius: 9px;
+    background: var(--ink);
+    color: var(--mint-light);
+    font-size: 0.88rem;
+    line-height: 1;
+  }
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: 27px;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .nav a {
+    color: #53636C;
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+  .nav a:hover, .nav a:focus-visible { color: var(--teal); }
+  .nav-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--ink);
+    color: #FFFFFF !important;
+    border-radius: 999px;
+    padding: 9px 15px;
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+  .nav-cta:hover { background: var(--teal); transform: translateY(-1px); }
+
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background: #081828;
+    color: #FFFFFF;
+    padding-top: 72px;
+  }
+  .hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse at 85% 12%, rgba(42, 157, 143, 0.30), transparent 44%),
+      radial-gradient(ellipse at 12% 78%, rgba(14, 124, 134, 0.18), transparent 46%),
+      linear-gradient(145deg, #081828 0%, #0B1F33 54%, #0D3443 100%);
+    pointer-events: none;
+  }
+  .hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 64px 64px;
+    mask-image: radial-gradient(ellipse at 60% 30%, #000 20%, transparent 72%);
+    -webkit-mask-image: radial-gradient(ellipse at 60% 30%, #000 20%, transparent 72%);
+    pointer-events: none;
+  }
+  .hero-grid {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1.03fr 0.97fr;
+    gap: 56px;
+    align-items: center;
+    padding-bottom: 54px;
+  }
+  .hero-copy { animation: rise 0.7s ease both; }
+  .hero-visual { animation: rise 0.8s 0.08s ease both; }
+  .eyebrow {
+    margin: 0 0 14px;
+    color: var(--teal);
+    font-size: 0.7rem;
+    font-weight: 750;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+  .eyebrow-light { color: var(--mint-light); }
+  .eyebrow .dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    margin-right: 9px;
+    border-radius: 50%;
+    background: var(--mint-light);
+    box-shadow: 0 0 0 4px rgba(142, 215, 210, 0.12);
+    vertical-align: 1px;
+  }
+  .hero h1 {
+    max-width: 760px;
+    margin: 0 0 22px;
+    color: #FFFFFF;
+    font-size: clamp(2.8rem, 5.1vw, 4.55rem);
+    font-weight: 760;
+    line-height: 0.99;
+    letter-spacing: -0.052em;
+  }
+  .h1-accent { color: var(--mint-light); }
+  .hero-lead {
+    max-width: 610px;
+    margin: 0;
+    color: #C8DCE3;
+    font-size: 1.04rem;
+    line-height: 1.68;
+  }
+  .hero-lead strong { color: #FFFFFF; font-weight: 650; }
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 11px;
+    margin-top: 28px;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 10px 18px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    font-family: var(--font);
+    font-size: 0.84rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease, transform 0.18s ease;
+  }
+  .btn:hover { transform: translateY(-1px); }
+  .btn-primary { background: var(--mint); color: #FFFFFF; }
+  .btn-primary:hover { background: #238779; }
+  .btn-ghost {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(255, 255, 255, 0.18);
+    color: #FFFFFF;
+  }
+  .btn-ghost:hover { background: rgba(255, 255, 255, 0.13); }
+  .hero-note {
+    margin: 20px 0 0;
+    color: #89A7B5;
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .hero-note strong { color: #D9E8EC; font-weight: 650; }
+
+  .hero-visual { position: relative; }
+  .browser {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 18px;
+    background: #0B1F33;
+    box-shadow: 0 34px 90px rgba(0, 0, 0, 0.42);
+  }
+  .browser-chrome {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding: 10px 13px;
+    background: #0F2A3B;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .browser-dots { display: flex; gap: 5px; flex: 0 0 auto; }
+  .browser-dots span {
+    display: block;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.24);
+  }
+  .browser-url {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    padding: 5px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.04);
+    color: #91A9B5;
+    font-size: 0.64rem;
+    text-align: center;
+  }
+  .browser-screen img { display: block; width: 100%; height: auto; }
+  .float-card {
+    position: absolute;
+    left: -18px;
+    bottom: 34px;
+    min-width: 194px;
+    padding: 13px 15px;
+    border: 1px solid rgba(11, 31, 51, 0.08);
+    border-radius: 13px;
+    background: #FFFFFF;
+    color: var(--ink);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.26);
+  }
+  .float-label {
+    display: block;
+    color: var(--muted);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+  .float-card strong {
+    display: block;
+    margin-top: 4px;
+    font-size: 1.25rem;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+  }
+  .float-meta { display: block; margin-top: 3px; color: var(--muted); font-size: 0.7rem; }
+
+  .stat-strip {
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    border-top: 1px solid var(--line-dark);
+  }
+  .stat {
+    padding: 22px 24px 28px;
+    border-right: 1px solid var(--line-dark);
+  }
+  .stat:first-child { padding-left: 0; }
+  .stat:last-child { border-right: 0; padding-right: 0; }
+  .stat-label {
+    color: var(--muted-light);
+    font-size: 0.66rem;
+    font-weight: 700;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+  .stat-value {
+    margin-top: 7px;
+    color: #FFFFFF;
+    font-size: 1.72rem;
+    font-weight: 720;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+  .stat-detail { margin-top: 5px; color: #8EA9B5; font-size: 0.75rem; line-height: 1.4; }
+
+  .section { padding: 94px 0; scroll-margin-top: 72px; }
+  .section-tinted {
+    background: var(--cream-deep);
+    border-top: 1px solid #E4E0D8;
+    border-bottom: 1px solid #E4E0D8;
+  }
+  .section-dark {
+    background: #0B1F33;
+    color: #FFFFFF;
+    border-top: 1px solid rgba(255, 255, 255, 0.04);
+  }
+  .split-head {
+    display: grid;
+    grid-template-columns: 1.15fr 0.85fr;
+    gap: 56px;
+    align-items: end;
+    margin-bottom: 38px;
+  }
+  .section h2 {
+    margin: 0;
+    color: var(--ink);
+    font-size: clamp(2.15rem, 4.2vw, 3.35rem);
+    font-weight: 750;
+    line-height: 1.02;
+    letter-spacing: -0.048em;
+  }
+  .section-dark h2 { color: #FFFFFF; }
+  .section-lead {
+    margin: 0 0 4px;
+    color: var(--muted);
+    font-size: 0.98rem;
+    line-height: 1.72;
+  }
+  .section-dark .section-lead { color: #AFC3CD; }
+
+  .fact-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .fact-card {
+    position: relative;
+    overflow: hidden;
+    min-height: 100%;
+    padding: 24px 24px 20px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--paper);
+    box-shadow: 0 8px 24px rgba(11, 31, 51, 0.035);
+  }
+  .fact-card::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--mint-light));
+  }
+  .fact-card:nth-child(2)::before { background: linear-gradient(90deg, var(--amber), #F4D58D); }
+  .fact-card:nth-child(3)::before { background: linear-gradient(90deg, var(--coral), #F4A261); }
+  .fact-kicker {
+    color: var(--teal);
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+  .fact-card:nth-child(2) .fact-kicker { color: #A98024; }
+  .fact-card:nth-child(3) .fact-kicker { color: #B9543A; }
+  .fact-value {
+    margin: 10px 0 2px;
+    font-size: 2.7rem;
+    font-weight: 760;
+    line-height: 0.95;
+    letter-spacing: -0.055em;
+  }
+  .fact-title { margin: 0 0 8px; font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+  .fact-body { margin: 0; color: var(--muted); font-size: 0.85rem; line-height: 1.58; }
+  .fact-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    align-items: center;
+    margin-top: 16px;
+    padding-top: 13px;
+    border-top: 1px solid #EDF0F2;
+    color: #667780;
+    font-size: 0.7rem;
+    font-weight: 600;
+  }
+  .fact-meta .sep { width: 3px; height: 3px; border-radius: 50%; background: #B7C2C8; }
+
+  .figure-card {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--paper);
+    box-shadow: var(--shadow);
+  }
+  .figure-card img { display: block; width: 100%; height: auto; padding: 16px 18px 4px; }
+  .figure-card figcaption {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 12px 22px 20px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.55;
+  }
+  .figure-card figcaption .num {
+    flex: 0 0 auto;
+    color: var(--teal);
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+    padding-top: 2px;
+  }
+  .figure-card figcaption strong { color: var(--ink); font-weight: 700; }
+
+  .insight-band {
+    display: grid;
+    grid-template-columns: 1.12fr 0.88fr;
+    gap: 44px;
+    align-items: center;
+    margin: 24px 0;
+    padding: 32px 34px;
+    border-radius: 20px;
+    background:
+      radial-gradient(ellipse at 92% 20%, rgba(42, 157, 143, 0.28), transparent 48%),
+      linear-gradient(118deg, #0B1F33, #0E4650);
+    color: #FFFFFF;
+    box-shadow: 0 20px 50px rgba(11, 31, 51, 0.14);
+  }
+  .insight-band h3 {
+    margin: 0 0 10px;
+    color: #FFFFFF;
+    font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+  .insight-band p { margin: 0; color: #B8CED7; font-size: 0.89rem; line-height: 1.68; }
+  .insight-band p strong { color: #FFFFFF; }
+  .overlap-stats { display: grid; gap: 15px; }
+  .overlap-stat { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; align-items: baseline; }
+  .overlap-stat span { color: #B8CED7; font-size: 0.7rem; font-weight: 600; }
+  .overlap-stat strong { color: #FFFFFF; font-size: 0.9rem; letter-spacing: -0.02em; }
+  .bar {
+    grid-column: 1 / -1;
+    height: 7px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .bar i { display: block; height: 100%; border-radius: inherit; background: var(--mint-light); }
+  .bar.bar-coral i { background: #F4A261; }
+  .bar.bar-amber i { background: var(--amber); }
+
+  .shot {
+    margin: 0;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--paper);
+    box-shadow: var(--shadow);
+  }
+  .shot img { display: block; width: 100%; height: auto; }
+  .shot figcaption {
+    padding: 16px 20px 18px;
+    border-top: 1px solid #EEF1F2;
+  }
+  .shot figcaption .shot-label {
+    display: block;
+    color: var(--teal);
+    font-size: 0.65rem;
+    font-weight: 750;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+  .shot figcaption p { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.55; }
+  .shot-wide { margin-bottom: 24px; }
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0 24px;
+    margin: 4px 0 28px;
+    border-top: 1px solid #DCE2E4;
+    border-bottom: 1px solid #DCE2E4;
+  }
+  .feature {
+    display: flex;
+    gap: 12px;
+    padding: 20px 0;
+  }
+  .feature + .feature { padding-left: 24px; border-left: 1px solid #E2E7E8; }
+  .feature-num {
+    flex: 0 0 auto;
+    color: var(--teal);
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.1em;
+    padding-top: 3px;
+  }
+  .feature h3 { margin: 0 0 5px; font-size: 0.88rem; line-height: 1.25; letter-spacing: -0.01em; }
+  .feature p { margin: 0; color: var(--muted); font-size: 0.77rem; line-height: 1.55; }
+  .shot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .metric-card {
+    padding: 22px 22px 20px;
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    background: var(--paper);
+    box-shadow: 0 8px 22px rgba(11, 31, 51, 0.03);
+  }
+  .metric-label {
+    color: var(--muted);
+    font-size: 0.65rem;
+    font-weight: 750;
+    letter-spacing: 0.13em;
+    text-transform: uppercase;
+  }
+  .metric-value {
+    margin: 9px 0 3px;
+    font-size: 2.1rem;
+    font-weight: 760;
+    line-height: 1;
+    letter-spacing: -0.05em;
+  }
+  .metric-detail { color: var(--muted); font-size: 0.73rem; line-height: 1.45; }
+  .metric-foot {
+    margin: 0 0 24px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+  .metric-foot strong { color: var(--ink); }
+
+  .rationale {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 38px;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 30px 32px;
+    border-radius: 20px;
+    background: #0B1F33;
+    color: #FFFFFF;
+  }
+  .rationale h3 {
+    margin: 0 0 10px;
+    color: #FFFFFF;
+    font-size: 1.5rem;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+  .rationale p { margin: 0; color: #B8CED7; font-size: 0.88rem; line-height: 1.66; }
+  .rationale p strong { color: #FFFFFF; }
+  .rationale-list { display: grid; gap: 9px; margin: 0; padding: 0; list-style: none; }
+  .rationale-list li {
+    display: flex;
+    gap: 9px;
+    align-items: flex-start;
+    color: #CDE0E6;
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+  .rationale-list li::before {
+    content: "✓";
+    flex: 0 0 auto;
+    color: var(--mint-light);
+    font-weight: 750;
+    font-size: 0.76rem;
+    padding-top: 1px;
+  }
+
+  .policy-grid {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 24px;
+    align-items: stretch;
+    margin-top: 24px;
+  }
+  .policy-copy {
+    padding: 28px 30px;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    background: var(--paper);
+    box-shadow: var(--shadow);
+  }
+  .policy-copy h3 {
+    margin: 0 0 10px;
+    font-size: 1.5rem;
+    line-height: 1.12;
+    letter-spacing: -0.035em;
+  }
+  .policy-copy > p { margin: 0; color: var(--muted); font-size: 0.87rem; line-height: 1.68; }
+  .policy-copy > p strong { color: var(--ink); }
+  .policy-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 20px;
+  }
+  .policy-stat {
+    padding: 13px 14px;
+    border: 1px solid #E8ECEF;
+    border-radius: 12px;
+    background: #F8FAF9;
+  }
+  .policy-stat strong {
+    display: block;
+    color: var(--ink);
+    font-size: 1.35rem;
+    line-height: 1;
+    letter-spacing: -0.035em;
+  }
+  .policy-stat span {
+    display: block;
+    margin-top: 4px;
+    color: var(--muted);
+    font-size: 0.68rem;
+    line-height: 1.35;
+  }
+  .policy-stat.accent-coral strong { color: #B9543A; }
+  .policy-stat.accent-teal strong { color: var(--teal); }
+
+  .drivers {
+    display: grid;
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 34px;
+    align-items: center;
+    margin-top: 24px;
+    padding: 26px 30px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--paper);
+  }
+  .drivers h3 { margin: 0 0 6px; font-size: 1.15rem; letter-spacing: -0.025em; }
+  .drivers p { margin: 0; color: var(--muted); font-size: 0.8rem; line-height: 1.55; }
+  .driver-tags { display: flex; flex-wrap: wrap; gap: 8px; justify-content: flex-end; }
+  .driver-tag {
+    padding: 7px 10px;
+    border: 1px solid #DCE6E5;
+    border-radius: 999px;
+    background: #F2F8F6;
+    color: #385B58;
+    font-size: 0.7rem;
+    font-weight: 650;
+    white-space: nowrap;
+  }
+  .driver-tag b { color: var(--teal); font-weight: 750; }
+
+  .link-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 24px;
+    margin-top: 24px;
+    font-size: 0.8rem;
+    font-weight: 650;
+  }
+  .link-row a { color: var(--teal); text-decoration: none; }
+  .link-row a:hover { text-decoration: underline; }
+
+  .method-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 40px;
+    align-items: start;
+  }
+  .method-grid > * { min-width: 0; }
+  .timeline { margin: 0; padding: 0; list-style: none; }
+  .timeline li {
+    position: relative;
+    display: grid;
+    grid-template-columns: 42px 1fr;
+    gap: 16px;
+    padding-bottom: 26px;
+  }
+  .timeline li:last-child { padding-bottom: 0; }
+  .timeline li:not(:last-child)::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 42px;
+    bottom: 0;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.14);
+  }
+  .timeline .num {
+    width: 42px;
+    height: 42px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(142, 215, 210, 0.34);
+    border-radius: 50%;
+    background: rgba(42, 157, 143, 0.1);
+    color: var(--mint-light);
+    font-size: 0.68rem;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+  }
+  .timeline h3 {
+    margin: 6px 0 5px;
+    color: #FFFFFF;
+    font-size: 1rem;
+    line-height: 1.25;
+    letter-spacing: -0.015em;
+    overflow-wrap: break-word;
+  }
+  .timeline p {
+    margin: 0;
+    color: #AFC3CD;
+    font-size: 0.82rem;
+    line-height: 1.62;
+    overflow-wrap: break-word;
+  }
+  .timeline li > div { min-width: 0; }
+  .repro-card {
+    min-width: 0;
+    padding: 27px 27px 24px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 20px;
+    background: #102B3C;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.2);
+  }
+  .repro-card h3 {
+    margin: 0 0 14px;
+    color: #FFFFFF;
+    font-size: 1.25rem;
+    line-height: 1.2;
+    letter-spacing: -0.03em;
+  }
+  .code-wrap { position: relative; min-width: 0; }
+  .code-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px 9px;
+  }
+  .code-head span {
+    color: #7E98A5;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.04em;
+  }
+  .repro-card pre {
+    margin: 0;
+    padding: 17px 16px;
+    overflow-x: auto;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    background: #081A28;
+    color: #D9E6EC;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    line-height: 1.7;
+    tab-size: 2;
+  }
+  .repro-card code { font-family: inherit; }
+  .copy-button {
+    padding: 5px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, 0.07);
+    color: #C7DCE3;
+    font-family: var(--font);
+    font-size: 0.63rem;
+    font-weight: 650;
+    cursor: pointer;
+    transition: background 0.18s ease, border-color 0.18s ease;
+  }
+  .copy-button:hover { background: rgba(255, 255, 255, 0.14); border-color: rgba(255, 255, 255, 0.26); }
+  .repro-note { margin: 13px 0 0; color: #8EA9B5; font-size: 0.72rem; line-height: 1.55; }
+  .repro-card .btn { margin-top: 16px; width: 100%; }
+  .btn-light { background: var(--mint-light); color: #081A28; }
+  .btn-light:hover { background: #A7E4DF; }
+
+  .method-note {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0 32px;
+    margin-top: 38px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255, 255, 255, 0.13);
+  }
+  .method-note div { border-left: 2px solid rgba(142, 215, 210, 0.45); padding-left: 14px; }
+  .method-note strong { display: block; color: #FFFFFF; font-size: 0.86rem; letter-spacing: -0.01em; }
+  .method-note span { display: block; margin-top: 4px; color: #AFC3CD; font-size: 0.74rem; line-height: 1.5; }
+  .section-dark .link-row { margin-top: 26px; }
+  .section-dark .link-row a { color: var(--mint-light); }
+
+  .limits-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .limit-card {
+    padding: 24px 24px 22px;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    background: var(--paper);
+  }
+  .limit-card .limit-num {
+    color: var(--coral);
+    font-size: 0.66rem;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+  }
+  .limit-card h3 { margin: 8px 0 6px; font-size: 1rem; letter-spacing: -0.02em; }
+  .limit-card p { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.62; }
+  .next-band {
+    display: grid;
+    grid-template-columns: 0.78fr 1.22fr;
+    gap: 42px;
+    align-items: start;
+    margin-top: 24px;
+    padding: 30px 32px;
+    border-radius: 20px;
+    background: var(--cream-deep);
+    border: 1px solid #E4E0D8;
+  }
+  .next-band h3 { margin: 0 0 7px; font-size: 1.4rem; letter-spacing: -0.035em; line-height: 1.15; }
+  .next-band p { margin: 0; color: var(--muted); font-size: 0.82rem; line-height: 1.6; }
+  .next-list {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px 24px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: next;
+  }
+  .next-list li {
+    position: relative;
+    padding-left: 26px;
+    color: #3E515B;
+    font-size: 0.8rem;
+    line-height: 1.55;
+    counter-increment: next;
+  }
+  .next-list li::before {
+    content: counter(next, decimal-leading-zero);
+    position: absolute;
+    left: 0;
+    top: 1px;
+    color: var(--teal);
+    font-size: 0.63rem;
+    font-weight: 750;
+    letter-spacing: 0.06em;
+  }
+
+  .closing {
+    padding: 72px 0;
+    background:
+      radial-gradient(ellipse at 86% 20%, rgba(42, 157, 143, 0.34), transparent 45%),
+      linear-gradient(120deg, #0B1F33, #0E4C55);
+    color: #FFFFFF;
+  }
+  .closing-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 42px;
+  }
+  .closing h2 {
+    margin: 0 0 10px;
+    color: #FFFFFF;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.04;
+    letter-spacing: -0.045em;
+  }
+  .closing p { margin: 0; max-width: 560px; color: #B8CED7; font-size: 0.9rem; line-height: 1.65; }
+  .closing-actions { display: flex; flex-wrap: wrap; gap: 10px; flex: 0 0 auto; }
+  .btn-outline-light {
+    background: transparent;
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #FFFFFF;
+  }
+  .btn-outline-light:hover { background: rgba(255, 255, 255, 0.08); }
+
+  .footer {
+    padding: 31px 0;
+    background: #071522;
+    color: #7E98A5;
+    font-size: 0.74rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+  .footer-inner { display: flex; justify-content: space-between; gap: 22px; flex-wrap: wrap; }
+  .footer strong { color: #C4D7DE; font-weight: 700; }
+  .footer-links { display: flex; flex-wrap: wrap; gap: 16px; }
+  .footer a { color: #A9C4CE; text-decoration: none; }
+  .footer a:hover { color: var(--mint-light); }
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(14px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 1000px) {
+    .hero-grid { grid-template-columns: 1fr; gap: 34px; padding-bottom: 46px; }
+    .hero-copy { max-width: 780px; }
+    .hero-visual { max-width: 760px; }
+    .stat-strip { grid-template-columns: 1fr 1fr; }
+    .stat { padding: 20px 0 22px; }
+    .stat:nth-child(2) { border-right: 0; padding-left: 26px; }
+    .stat:nth-child(3) { padding-left: 0; border-top: 1px solid var(--line-dark); }
+    .stat:nth-child(4) { border-top: 1px solid var(--line-dark); padding-left: 26px; }
+    .split-head { grid-template-columns: 1fr; gap: 18px; align-items: start; }
+    .section-lead { max-width: 720px; }
+    .fact-grid { grid-template-columns: 1fr 1fr; }
+    .insight-band { grid-template-columns: 1fr; gap: 24px; }
+    .feature-grid { grid-template-columns: 1fr 1fr; }
+    .feature:nth-child(3) { border-left: 0; padding-left: 0; border-top: 1px solid #E2E7E8; }
+    .feature:nth-child(4) { border-top: 1px solid #E2E7E8; }
+    .metric-grid { grid-template-columns: 1fr 1fr; }
+    .rationale { grid-template-columns: 1fr; gap: 20px; }
+    .policy-grid { grid-template-columns: 1fr; }
+    .drivers { grid-template-columns: 1fr; gap: 16px; }
+    .driver-tags { justify-content: flex-start; }
+    .method-grid { grid-template-columns: minmax(0, 1fr); gap: 30px; }
+    .method-note { grid-template-columns: 1fr 1fr; gap: 20px 28px; }
+    .next-band { grid-template-columns: 1fr; gap: 20px; }
+    .closing-inner { align-items: flex-start; flex-direction: column; }
+  }
+
+  @media (max-width: 760px) {
+    .wrap { width: min(var(--max), calc(100% - 32px)); }
+    .nav { gap: 0; }
+    .nav a:not(.nav-cta) { display: none; }
+    .site-header { position: relative; }
+    .hero { padding-top: 48px; }
+    .hero h1 { font-size: clamp(2.55rem, 11vw, 3.65rem); }
+    .hero-lead { font-size: 0.98rem; }
+    .float-card { left: auto; right: 12px; bottom: 12px; min-width: 0; }
+    .stat-strip { grid-template-columns: 1fr; }
+    .stat, .stat:nth-child(2), .stat:nth-child(3), .stat:nth-child(4) {
+      padding: 17px 0;
+      border-right: 0;
+      border-top: 1px solid var(--line-dark);
+    }
+    .stat:first-child { border-top: 0; }
+    .section { padding: 68px 0; }
+    .section h2 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+    .fact-grid, .shot-grid, .metric-grid, .limits-grid, .next-list { grid-template-columns: 1fr; }
+    .feature-grid { grid-template-columns: 1fr; }
+    .feature, .feature:nth-child(3), .feature:nth-child(4) {
+      padding: 17px 0;
+      border-left: 0;
+      border-top: 1px solid #E2E7E8;
+    }
+    .feature:first-child { border-top: 0; }
+    .figure-card img { padding: 10px 8px 2px; }
+    .figure-card figcaption { padding: 10px 14px 16px; }
+    .insight-band { padding: 26px 22px; }
+    .policy-copy { padding: 23px 22px; }
+    .drivers { padding: 22px; }
+    .next-band { padding: 24px 22px; }
+    .method-note { grid-template-columns: 1fr; }
+    .repro-card { padding: 22px 18px; }
+    .closing { padding: 56px 0; }
+    .closing-actions { width: 100%; }
+    .closing-actions .btn { flex: 1 1 auto; }
+    .footer-inner { flex-direction: column; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <a class="brand" href="#top" aria-label="Churn Signal home">
+      <span class="brand-mark" aria-hidden="true">◈</span>
+      <span>Churn Signal</span>
+    </a>
+    <nav class="nav" aria-label="Primary navigation">
+      <a href="#finding">The finding</a>
+      <a href="#workbench">Workbench</a>
+      <a href="#evaluation">Evaluation</a>
+      <a href="#method">Method</a>
+      <a href="#limits">Limits</a>
+      <a class="nav-cta" href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <section class="hero" id="top">
+    <div class="hero-grid-bg" aria-hidden="true"></div>
+    <div class="wrap hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow eyebrow-light"><span class="dot" aria-hidden="true"></span>Customer retention intelligence · portfolio project</p>
+        <h1>Know who is <span class="h1-accent">about to leave</span> before they do.</h1>
+        <p class="hero-lead">
+          A reproducible churn model and retention workbench built on <strong>7,043 IBM Telco customers</strong>.
+          It turns a probability ranking into an explicit contact policy — with the evaluation, trade-offs,
+          and limits on the table.
+        </p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">Explore the repository <span aria-hidden="true">↗</span></a>
+          <a class="btn btn-ghost" href="#workbench">Tour the workbench <span aria-hidden="true">→</span></a>
+        </div>
+        <p class="hero-note">
+          Logistic regression · <strong>0.846</strong> holdout ROC-AUC · threshold tuned out-of-fold ·
+          one-time holdout evaluation
+        </p>
+      </div>
+
+      <div class="hero-visual">
+        <div class="browser">
+          <div class="browser-chrome" aria-hidden="true">
+            <div class="browser-dots"><span></span><span></span><span></span></div>
+            <div class="browser-url">localhost:8501 · Churn Signal workbench</div>
+            <div class="browser-dots"><span></span></div>
+          </div>
+          <div class="browser-screen">
+            <img src="assets/app_overview.png" width="1440" height="1100" alt="Churn Signal overview page showing customer KPIs, contract churn rates, and the retention case.">
+          </div>
+        </div>
+        <div class="float-card" aria-hidden="true">
+          <span class="float-label">Holdout decision</span>
+          <strong>492 flagged</strong>
+          <span class="float-meta">of 1,409 accounts · 34.9% alert rate</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="wrap stat-strip">
+      <div class="stat">
+        <div class="stat-label">Dataset</div>
+        <div class="stat-value">7,043</div>
+        <div class="stat-detail">customers · 21 raw columns</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Observed churn</div>
+        <div class="stat-value">26.5%</div>
+        <div class="stat-detail">1,869 churners in the historical base</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Annualised churn revenue</div>
+        <div class="stat-value">$1.67M</div>
+        <div class="stat-detail">observed monthly charges from churned accounts × 12</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Holdout ROC-AUC</div>
+        <div class="stat-value">0.846</div>
+        <div class="stat-detail">72.2% recall · 54.9% precision at 0.583</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="finding">
+    <div class="wrap">
+      <div class="split-head">
+        <div>
+          <p class="eyebrow">01 · What the data says</p>
+          <h2>Churn is concentrated,<br>not random.</h2>
+        </div>
+        <p class="section-lead">
+          Three observable account facts carry most of the signal — and most of the revenue exposure.
+          The model is most useful when it ranks the next-best accounts inside those segments,
+          not when it treats every customer as equally urgent.
+        </p>
+      </div>
+
+      <div class="fact-grid">
+        <article class="fact-card">
+          <div class="fact-kicker">Contract</div>
+          <div class="fact-value">42.7%</div>
+          <h3 class="fact-title">Month-to-month churn</h3>
+          <p class="fact-body">Versus 11.3% on one-year and 2.8% on two-year contracts. Commitment length is the strongest segment signal.</p>
+          <div class="fact-meta"><span>55.0% of customers</span><span class="sep" aria-hidden="true"></span><span>88.5% of churners</span></div>
+        </article>
+        <article class="fact-card">
+          <div class="fact-kicker">Tenure</div>
+          <div class="fact-value">52.9%</div>
+          <h3 class="fact-title">First six months</h3>
+          <p class="fact-body">The onboarding window carries the highest churn rate in the lifecycle. Risk falls sharply after the first year.</p>
+          <div class="fact-meta"><span>1,481 customers</span><span class="sep" aria-hidden="true"></span><span>$599K annualised churn revenue</span></div>
+        </article>
+        <article class="fact-card">
+          <div class="fact-kicker">The actionable overlap</div>
+          <div class="fact-value">54.6%</div>
+          <h3 class="fact-title">Month-to-month fiber</h3>
+          <p class="fact-body">The highest-risk large segment — and the clearest campaign target. This is where risk and revenue exposure compound.</p>
+          <div class="fact-meta"><span>30.2% of customers</span><span class="sep" aria-hidden="true"></span><span>72.2% of churn revenue</span></div>
+        </article>
+      </div>
+
+      <figure class="figure-card">
+        <img src="assets/segment_risk_profile.png" width="2699" height="800" loading="lazy" alt="Horizontal bar charts showing churn rate by contract, internet service, and payment method. Month-to-month, fiber optic, and electronic check are highest.">
+        <figcaption>
+          <span class="num">Fig. 01</span>
+          <span><strong>Three dimensions, one pattern.</strong> Churn concentrates in short-commitment, higher-price, self-service accounts. Source: 7,043 records with observed churn labels.</span>
+        </figcaption>
+      </figure>
+
+      <div class="insight-band">
+        <div>
+          <p class="eyebrow eyebrow-light">The actionable overlap</p>
+          <h3>30.2% of customers. 62.2% of churners. 72.2% of the revenue exposure.</h3>
+          <p>
+            Month-to-month fiber accounts are not a niche. They are a large, measurable pool where a focused
+            retention motion has the most leverage. <strong>The model's ranking decides which accounts inside that pool
+            a team works first.</strong>
+          </p>
+        </div>
+        <div class="overlap-stats" aria-label="Month-to-month fiber segment concentration">
+          <div class="overlap-stat">
+            <span>Share of customers</span><strong>30.2%</strong>
+            <div class="bar"><i style="width: 30.2%"></i></div>
+          </div>
+          <div class="overlap-stat">
+            <span>Share of churners</span><strong>62.2%</strong>
+            <div class="bar bar-amber"><i style="width: 62.2%"></i></div>
+          </div>
+          <div class="overlap-stat">
+            <span>Share of annualised churn revenue</span><strong>72.2%</strong>
+            <div class="bar bar-coral"><i style="width: 72.2%"></i></div>
+          </div>
+        </div>
+      </div>
+
+      <figure class="figure-card">
+        <img src="assets/churn_overview.png" width="2654" height="818" loading="lazy" alt="Churn overview showing a donut chart of retained versus churned customers, churn rate by contract length, and churn rate by tenure band.">
+        <figcaption>
+          <span class="num">Fig. 02</span>
+          <span><strong>The lifecycle amplifies the segment effect.</strong> The first six months are the highest-risk stage; the 61–72 month cohort is down to 6.6% churn.</span>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section section-tinted" id="workbench">
+    <div class="wrap">
+      <div class="split-head">
+        <div>
+          <p class="eyebrow">02 · The workbench</p>
+          <h2>A score is not a strategy.<br>This is the workbench around it.</h2>
+        </div>
+        <p class="section-lead">
+          The Streamlit app turns the model into five linked surfaces: an executive overview,
+          a single-customer scenario workbench, batch scoring, a threshold sandbox, and the method notes.
+          Every page is built around a decision a retention team can actually make.
+        </p>
+      </div>
+
+      <figure class="shot shot-wide">
+        <img src="assets/app_scorer.png" width="1440" height="1100" loading="lazy" alt="Customer risk scorer page with account inputs, an 88.1% churn probability, a critical risk tier, revenue at risk, and a gauge.">
+        <figcaption>
+          <span class="shot-label">01 / Customer risk scorer</span>
+          <p>Change tenure, contract, services, and billing facts. The score, risk tier, expected annual revenue at risk, drivers, and retention plays update together.</p>
+        </figcaption>
+      </figure>
+
+      <div class="feature-grid">
+        <article class="feature">
+          <span class="feature-num">01</span>
+          <div>
+            <h3>Interrogate a single score</h3>
+            <p>One-at-a-time sensitivity against training baselines — transparent, and explicitly not causal.</p>
+          </div>
+        </article>
+        <article class="feature">
+          <span class="feature-num">02</span>
+          <div>
+            <h3>Work a list, not a demo</h3>
+            <p>Upload the raw Telco schema, validate rows, score every account, and download a campaign file.</p>
+          </div>
+        </article>
+        <article class="feature">
+          <span class="feature-num">03</span>
+          <div>
+            <h3>Make the policy explicit</h3>
+            <p>Move the threshold and watch precision, recall, contact volume, and decile capture change.</p>
+          </div>
+        </article>
+        <article class="feature">
+          <span class="feature-num">04</span>
+          <div>
+            <h3>Put the limits in the product</h3>
+            <p>A model card, data dictionary, and reproduction steps live beside the scores — not in a footnote.</p>
+          </div>
+        </article>
+      </div>
+
+      <div class="shot-grid">
+        <figure class="shot">
+          <img src="assets/app_batch.png" width="1440" height="1100" loading="lazy" alt="Batch scoring page with a CSV upload, a 25-row sample, customer-level probabilities, risk tiers, and a downloadable scored file.">
+          <figcaption>
+            <span class="shot-label">02 / Batch scoring</span>
+            <p>Validate a raw customer file, score it in one pass, and export the ranked list with revenue-at-risk estimates.</p>
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="assets/app_performance.png" width="1440" height="1100" loading="lazy" alt="Model performance page showing candidate comparison, holdout KPIs, and the evaluation tabs.">
+          <figcaption>
+            <span class="shot-label">03 / Model performance</span>
+            <p>Replay the holdout evaluation, compare five candidates, and test a different outreach threshold against the same data.</p>
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="evaluation">
+    <div class="wrap">
+      <div class="split-head">
+        <div>
+          <p class="eyebrow">03 · Evaluation</p>
+          <h2>Every number is regenerated,<br>not hand-typed.</h2>
+        </div>
+        <p class="section-lead">
+          Five candidate pipelines are compared with 5-fold stratified CV ROC-AUC. The winner is evaluated once
+          on a 20% holdout; the decision threshold is tuned on out-of-fold training predictions, not on the test set.
+        </p>
+      </div>
+
+      <div class="metric-grid">
+        <div class="metric-card">
+          <div class="metric-label">CV ROC-AUC</div>
+          <div class="metric-value">0.8474</div>
+          <div class="metric-detail">± 0.0110 · 5-fold stratified</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Holdout ROC-AUC</div>
+          <div class="metric-value">0.8457</div>
+          <div class="metric-detail">1,409 customers · 374 churners</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Recall</div>
+          <div class="metric-value">72.2%</div>
+          <div class="metric-detail">270 of 374 churners flagged</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Precision</div>
+          <div class="metric-value">54.9%</div>
+          <div class="metric-detail">270 of 492 contacts were churners</div>
+        </div>
+      </div>
+      <p class="metric-foot">
+        <strong>PR-AUC 0.6532</strong> · F1 0.6236 · Brier 0.1657 · top-decile lift 2.86× ·
+        top three deciles capture 66.0% of holdout churners.
+      </p>
+
+      <div class="rationale">
+        <div>
+          <p class="eyebrow eyebrow-light">Why logistic regression?</p>
+          <h3>The simplest model won the selection rule.</h3>
+          <p>
+            It beat gradient boosting on CV ROC-AUC (<strong>0.8474 vs 0.8456</strong>), is easier to explain
+            and monitor, and serializes to a <strong>6.6 KB</strong> bundle. The extra complexity did not buy
+            better holdout ranking.
+          </p>
+        </div>
+        <ul class="rationale-list">
+          <li>Preprocessing lives inside the pipeline, so CV refits the encoder in every fold.</li>
+          <li>The threshold is selected on out-of-fold training predictions.</li>
+          <li>The holdout set is scored once, after model selection.</li>
+          <li>The winning pipeline is refit on all labelled rows only for deployment.</li>
+        </ul>
+      </div>
+
+      <figure class="figure-card">
+        <img src="assets/model_comparison.png" width="1871" height="844" loading="lazy" alt="Grouped horizontal bar chart comparing 5-fold cross-validation and holdout ROC-AUC for five candidate models. Logistic regression is highest.">
+        <figcaption>
+          <span class="num">Fig. 03</span>
+          <span><strong>Five candidates, one rule.</strong> Selection is by CV ROC-AUC, not by a hand-picked holdout result. Error bars show CV variability.</span>
+        </figcaption>
+      </figure>
+
+      <div class="policy-grid">
+        <figure class="figure-card">
+          <img src="assets/confusion_matrix.png" width="929" height="809" loading="lazy" alt="Confusion matrix at threshold 0.583: 813 true negatives, 222 false positives, 104 false negatives, and 270 true positives.">
+          <figcaption>
+            <span class="num">Fig. 04</span>
+            <span><strong>Holdout confusion matrix</strong> at the deployed 0.583 threshold.</span>
+          </figcaption>
+        </figure>
+        <div class="policy-copy">
+          <p class="eyebrow">Decision policy</p>
+          <h3>0.583 is a capacity decision, not a default.</h3>
+          <p>
+            At the deployed threshold, <strong>492 of 1,409</strong> holdout accounts are flagged.
+            The model catches <strong>270 churners</strong> and contacts <strong>222 retained customers</strong>.
+            A lower threshold catches more churn; a higher one protects outreach capacity.
+          </p>
+          <div class="policy-stats">
+            <div class="policy-stat accent-teal"><strong>270</strong><span>churners caught</span></div>
+            <div class="policy-stat accent-coral"><strong>104</strong><span>churners missed</span></div>
+            <div class="policy-stat"><strong>222</strong><span>retained customers contacted</span></div>
+            <div class="policy-stat"><strong>34.9%</strong><span>alert rate</span></div>
+          </div>
+          <div class="link-row">
+            <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/reports/evaluation/summary.md" target="_blank" rel="noreferrer">Full evaluation summary ↗</a>
+            <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/models/metrics.json" target="_blank" rel="noreferrer">Metrics JSON ↗</a>
+          </div>
+        </div>
+      </div>
+
+      <figure class="figure-card" style="margin-top: 24px;">
+        <img src="assets/risk_distribution.png" width="1997" height="783" loading="lazy" alt="Risk distribution charts showing customers and observed churn rate by Low, Medium, High, and Critical risk tiers on the holdout set.">
+        <figcaption>
+          <span class="num">Fig. 05</span>
+          <span><strong>The risk bands separate churners from retained customers.</strong> The top three probability deciles capture 66.0% of all holdout churners — the practical case for a limited outreach team.</span>
+        </figcaption>
+      </figure>
+
+      <div class="drivers">
+        <div>
+          <p class="eyebrow">Permutation importance</p>
+          <h3>What the model leans on</h3>
+          <p>The top five features account for 86.5% of the measured holdout importance. Correlated features can share credit.</p>
+        </div>
+        <div class="driver-tags" aria-label="Most important model features">
+          <span class="driver-tag">Tenure <b>21.2%</b></span>
+          <span class="driver-tag">Internet service <b>19.5%</b></span>
+          <span class="driver-tag">Contract <b>18.9%</b></span>
+          <span class="driver-tag">Monthly charges <b>18.4%</b></span>
+          <span class="driver-tag">New customer <b>8.4%</b></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section-dark" id="method">
+    <div class="wrap">
+      <div class="split-head">
+        <div>
+          <p class="eyebrow eyebrow-light">04 · Method</p>
+          <h2>Reproducible by design.<br>Honest by default.</h2>
+        </div>
+        <p class="section-lead">
+          A deterministic CLI takes the raw CSV to a serialized bundle, evaluation tables, and generated figures.
+          The app reads those artifacts; it never retrains on page load.
+        </p>
+      </div>
+
+      <div class="method-grid">
+        <ol class="timeline">
+          <li>
+            <span class="num">01</span>
+            <div>
+              <h3>Validate the schema</h3>
+              <p>Check required columns, unique customer IDs, numeric tenure and charges, and valid target labels.</p>
+            </div>
+          </li>
+          <li>
+            <span class="num">02</span>
+            <div>
+              <h3>Engineer features</h3>
+              <p>Handle 11 blank TotalCharges records explicitly; add AvgMonthlySpend, ServiceCount, and IsNewCustomer.</p>
+            </div>
+          </li>
+          <li>
+            <span class="num">03</span>
+            <div>
+              <h3>Compare five candidates</h3>
+              <p>Logistic regression, random forest, gradient boosting, histogram gradient boosting, and extra trees under 5-fold stratified CV.</p>
+            </div>
+          </li>
+          <li>
+            <span class="num">04</span>
+            <div>
+              <h3>Tune the decision</h3>
+              <p>Select the model by CV ROC-AUC. Tune the F1 threshold on out-of-fold training predictions, not on the holdout.</p>
+            </div>
+          </li>
+          <li>
+            <span class="num">05</span>
+            <div>
+              <h3>Evaluate once, then export</h3>
+              <p>Score the 20% holdout, refit the winner on all labelled rows, and serialize the model, threshold, baselines, and metadata.</p>
+            </div>
+          </li>
+        </ol>
+
+        <aside class="repro-card" id="reproduce">
+          <p class="eyebrow eyebrow-light">Run it locally</p>
+          <h3>From clone to score.</h3>
+          <div class="code-wrap">
+            <div class="code-head">
+              <span>terminal</span>
+              <button class="copy-button" type="button" data-copy-target="repro-code">Copy</button>
+            </div>
+            <pre><code id="repro-code">git clone https://github.com/mlaharsh/Customer_Churn_Prediction.git
+cd Customer_Churn_Prediction
+python -m venv .venv
+
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+# source .venv/bin/activate
+
+pip install -r requirements-dev.txt
+python -m churn.train
+python -m pytest -q
+streamlit run app.py</code></pre>
+          </div>
+          <a class="btn btn-light" href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/deployment.md" target="_blank" rel="noreferrer">Deployment guide <span aria-hidden="true">↗</span></a>
+          <p class="repro-note">
+            Training takes about a minute on a laptop. The committed model bundle runs without retraining;
+            Docker and GitHub Actions workflows are included.
+          </p>
+        </aside>
+      </div>
+
+      <div class="method-note">
+        <div>
+          <strong>11 blank charges, handled explicitly</strong>
+          <span>All at tenure = 0. Filled as MonthlyCharges × tenure, which is zero for those records.</span>
+        </div>
+        <div>
+          <strong>22 model features</strong>
+          <span>Three deterministic derived features. One-hot encoding and scaling live inside the pipeline.</span>
+        </div>
+        <div>
+          <strong>One holdout, one decision</strong>
+          <span>Stratified 20% split. No repeated peeking at test performance while tuning.</span>
+        </div>
+      </div>
+
+      <div class="link-row">
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/model_card.md" target="_blank" rel="noreferrer">Model card ↗</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/data_dictionary.md" target="_blank" rel="noreferrer">Data dictionary ↗</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/reports/evaluation/summary.md" target="_blank" rel="noreferrer">Evaluation summary ↗</a>
+        <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/models/metrics.json" target="_blank" rel="noreferrer">Metrics JSON ↗</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="limits">
+    <div class="wrap">
+      <div class="split-head">
+        <div>
+          <p class="eyebrow">05 · Limits &amp; responsible use</p>
+          <h2>What this model<br>cannot prove.</h2>
+        </div>
+        <p class="section-lead">
+          A useful model is honest about its boundary. This is a retrospective risk-ranking exercise,
+          not a causal uplift study, a production credit system, or a guarantee of customer behavior.
+        </p>
+      </div>
+
+      <div class="limits-grid">
+        <article class="limit-card">
+          <div class="limit-num">01 / VALIDATION</div>
+          <h3>Retrospective, not temporal</h3>
+          <p>One historical 80/20 split. There is no time-based validation or live experiment, and the historical Telco base may not represent a current customer population.</p>
+        </article>
+        <article class="limit-card">
+          <div class="limit-num">02 / CAUSATION</div>
+          <h3>Correlation, not causation</h3>
+          <p>The what-if view resets one feature at a time. It can tell you which account facts are associated with risk, but not what a retention offer will change.</p>
+        </article>
+        <article class="limit-card">
+          <div class="limit-num">03 / CALIBRATION</div>
+          <h3>Probabilities are not exact odds</h3>
+          <p>The Brier score is 0.1657. Scores are useful for ranking and campaign sizing; they should not be read as an individual’s exact probability of leaving.</p>
+        </article>
+        <article class="limit-card">
+          <div class="limit-num">04 / FAIRNESS &amp; DRIFT</div>
+          <h3>The monitoring burden is real</h3>
+          <p>Gender and senior-citizen status are in the schema. Subgroup performance, score drift, alert rate, and realized churn require ongoing review before operational use.</p>
+        </article>
+      </div>
+
+      <div class="next-band">
+        <div>
+          <p class="eyebrow">If this went to production</p>
+          <h3>Validate the decision,<br>not just the score.</h3>
+          <p>The model is a starting point for a measured retention program, not a finished policy.</p>
+        </div>
+        <ol class="next-list">
+          <li>Run a temporal holdout and a live A/B or matched-control test.</li>
+          <li>Set the threshold from contact capacity and the relative cost of a missed churner.</li>
+          <li>Measure uplift, not just observed churn among contacted accounts.</li>
+          <li>Monitor calibration, alert rate, segment drift, and subgroup error rates.</li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="closing">
+    <div class="wrap closing-inner">
+      <div>
+        <p class="eyebrow eyebrow-light">Open source · MIT</p>
+        <h2>Inspect every number.<br>Run every step.</h2>
+        <p>
+          The model bundle, evaluation tables, tests, Docker image, CI workflows, and the Streamlit workbench
+          are all in the repository. No hidden notebooks, no hand-typed metrics.
+        </p>
+      </div>
+      <div class="closing-actions">
+        <a class="btn btn-primary" href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">View on GitHub <span aria-hidden="true">↗</span></a>
+        <a class="btn btn-outline-light" href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/reports/evaluation/summary.md" target="_blank" rel="noreferrer">Read the evaluation <span aria-hidden="true">↗</span></a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-inner">
+    <div>
+      <strong>Churn Signal</strong> · customer churn prediction &amp; retention workbench.<br>
+      Built by MLA Harsh. Dataset: <a href="https://www.kaggle.com/datasets/blastchar/telco-customer-churn" target="_blank" rel="noreferrer">IBM Telco Customer Churn</a>. Static showcase deployed with GitHub Pages.
+    </div>
+    <div class="footer-links">
+      <a href="https://github.com/mlaharsh/Customer_Churn_Prediction" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/model_card.md" target="_blank" rel="noreferrer">Model card</a>
+      <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/docs/deployment.md" target="_blank" rel="noreferrer">Deployment</a>
+      <a href="https://github.com/mlaharsh/Customer_Churn_Prediction/blob/master/LICENSE" target="_blank" rel="noreferrer">MIT license</a>
+    </div>
+  </div>
+</footer>
+
+<script>
+  document.querySelectorAll(".copy-button").forEach(function (button) {
+    button.addEventListener("click", async function () {
+      var target = document.getElementById(button.dataset.copyTarget);
+      if (!target) return;
+      var text = target.innerText;
+      try {
+        await navigator.clipboard.writeText(text);
+        button.textContent = "Copied";
+        window.setTimeout(function () { button.textContent = "Copy"; }, 1800);
+      } catch (error) {
+        button.textContent = "Select code";
+        window.setTimeout(function () { button.textContent = "Copy"; }, 1800);
+      }
+    });
+  });
+</script>
+</body>
+</html>

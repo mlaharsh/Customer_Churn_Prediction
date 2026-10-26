@@ -1,0 +1,4 @@
+segment,customers,churners,monthly_revenue,monthly_churn_revenue,annual_churn_revenue,churn_rate
+Fiber optic,3096,1297,283284.4,114300.05,1371600.6,0.4189
+DSL,2421,459,140665.35,22529.2,270350.4,0.1896
+No,1526,113,32166.85,2301.6,27619.2,0.074

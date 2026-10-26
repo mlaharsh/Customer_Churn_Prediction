@@ -1,0 +1,5 @@
+segment,customers,churners,monthly_revenue,monthly_churn_revenue,annual_churn_revenue,churn_rate
+Electronic check,2365,1071,180345.0,84288.75,1011465.0,0.4529
+Mailed check,1612,308,70794.3,16803.6,201643.2,0.1911
+Bank transfer (automatic),1544,258,103745.45,20091.9,241102.8,0.1671
+Credit card (automatic),1522,232,101231.85,17946.6,215359.2,0.1524
