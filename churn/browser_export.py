@@ -221,8 +221,15 @@ def build_browser_artifact(
             )
             for feature in FEATURES
         }
-        expected_probability = float(
-            pipeline.predict_proba(pd.DataFrame([cleaned_features], columns=FEATURES))[0, 1]
+        # Round away cross-platform BLAS last-bit noise so the committed file
+        # and its byte-level freshness check are stable across environments.
+        expected_probability = round(
+            float(
+                pipeline.predict_proba(
+                    pd.DataFrame([cleaned_features], columns=FEATURES)
+                )[0, 1]
+            ),
+            12,
         )
         examples.append(
             {

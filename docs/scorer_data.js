@@ -375,7 +375,7 @@ window.CHURN_MODEL = {
         "PaperlessBilling": "Yes",
         "PaymentMethod": "Electronic check"
       },
-      "expectedProbability": 0.946378938603975
+      "expectedProbability": 0.946378938604
     },
     {
       "id": "loyal",
@@ -404,7 +404,7 @@ window.CHURN_MODEL = {
         "PaperlessBilling": "No",
         "PaymentMethod": "Bank transfer (automatic)"
       },
-      "expectedProbability": 0.018335384745067435
+      "expectedProbability": 0.018335384745
     },
     {
       "id": "mid-term",
@@ -433,7 +433,7 @@ window.CHURN_MODEL = {
         "PaperlessBilling": "Yes",
         "PaymentMethod": "Credit card (automatic)"
       },
-      "expectedProbability": 0.17948545138236838
+      "expectedProbability": 0.179485451382
     }
   ],
   "holdout": {
